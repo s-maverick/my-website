@@ -3,10 +3,10 @@ import { Nav } from "@/components/portfolio/Nav";
 import { StatusBar } from "@/components/portfolio/StatusBar";
 import { Hero } from "@/components/portfolio/Hero";
 import { Philosophy } from "@/components/portfolio/Philosophy";
-import { ProjectShowcase } from "@/components/portfolio/ProjectShowcase1";
+import { ProjectShowcase } from "@/components/portfolio/ProjectShowcase";
 import { Timeline } from "@/components/portfolio/Timeline";
 import { Stack } from "@/components/portfolio/Stack";
-import { Contact } from "@/components/portfolio/Contact1";
+import { Contact } from "@/components/portfolio/Contact";
 import { CursorGlow } from "@/components/portfolio/CursorGlow";
 
 export const Route = createFileRoute("/")({
