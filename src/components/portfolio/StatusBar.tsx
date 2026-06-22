@@ -20,7 +20,8 @@ export function StatusBar() {
   }, []);
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-40 border-t border-border bg-background/80 backdrop-blur-sm">
+    // <div className="fixed bottom-0 left-0 right-0 z-40 border-t border-border bg-background/80 backdrop-blur-sm">
+      <div className="pointer-events-none fixed bottom-0 left-0 right-0 z-40 border-t border-border bg-background/80 backdrop-blur-sm">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-1.5 font-mono text-[10px] uppercase tracking-wider text-muted-foreground sm:text-xs">
         <div className="flex items-center gap-3">
           <span className="flex items-center gap-1.5">
