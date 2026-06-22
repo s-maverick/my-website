@@ -8,44 +8,126 @@ type Node = d3.SimulationNodeDatum & {
 };
 type Link = d3.SimulationLinkDatum<Node>;
 
+
+// const NODES: Node[] = [
+//   { id: "sangam", group: 0, r: 22 },
+//   { id: "python", group: 1, r: 14 },
+//   { id: "fastapi", group: 1, r: 12 },
+//   { id: "supabase", group: 1, r: 12 },
+//   { id: "react", group: 1, r: 12 },
+//   { id: "rag", group: 2, r: 13 },
+//   { id: "llms", group: 2, r: 13 },
+//   { id: "n8n", group: 2, r: 10 },
+//   { id: "pytorch", group: 3, r: 11 },
+//   { id: "pandas", group: 3, r: 11 },
+//   { id: "sql", group: 3, r: 11 },
+//   { id: "d3", group: 1, r: 10 },
+//   { id: "nlp", group: 2, r: 11 },
+//   { id: "geospatial", group: 3, r: 10 },
+// ];
+
+// const LINKS: Link[] = [
+//   ["sangam", "python"],
+//   ["sangam", "rag"],
+//   ["sangam", "react"],
+//   ["sangam", "pytorch"],
+//   ["sangam", "supabase"],
+//   ["sangam", "sql"],
+//   ["python", "pandas"],
+//   ["python", "pytorch"],
+//   ["python", "fastapi"],
+//   ["fastapi", "supabase"],
+//   ["react", "d3"],
+//   ["rag", "llms"],
+//   ["rag", "nlp"],
+//   ["llms", "n8n"],
+//   ["n8n", "sangam"],
+//   ["pytorch", "nlp"],
+//   ["pandas", "sql"],
+//   ["sangam", "geospatial"],
+//   ["geospatial", "d3"],
+// ].map(([source, target]) => ({ source, target }));
+
+
 const NODES: Node[] = [
-  { id: "sangam", group: 0, r: 22 },
-  { id: "python", group: 1, r: 14 },
-  { id: "fastapi", group: 1, r: 12 },
-  { id: "supabase", group: 1, r: 12 },
-  { id: "react", group: 1, r: 12 },
-  { id: "rag", group: 2, r: 13 },
-  { id: "llms", group: 2, r: 13 },
-  { id: "n8n", group: 2, r: 10 },
-  { id: "pytorch", group: 3, r: 11 },
-  { id: "pandas", group: 3, r: 11 },
-  { id: "sql", group: 3, r: 11 },
-  { id: "d3", group: 1, r: 10 },
-  { id: "nlp", group: 2, r: 11 },
+  { id: "sangam",     group: 0, r: 22 },
+
+  // cluster anchors
+  { id: "python",     group: 1, r: 14 },
+  { id: "rag",        group: 2, r: 14 },
+  { id: "data eng",   group: 3, r: 14 },
+  { id: "backend",    group: 4, r: 14 },
+  { id: "react",      group: 5, r: 14 },
+
+  // python leaves
+  { id: "pandas",     group: 1, r: 10 },
+  { id: "sklearn",    group: 1, r: 10 },
+  { id: "opencv",     group: 1, r: 10 },
+  { id: "pytorch",    group: 1, r: 11 },
+
+  // rag / llm leaves
+  { id: "langchain",  group: 2, r: 11 },
+  { id: "chromadb",   group: 2, r: 10 },
+  { id: "n8n",        group: 2, r: 10 },
+  { id: "llms",       group: 2, r: 11 },
+
+  // data eng leaves
+  { id: "spark",      group: 3, r: 10 },
+  { id: "airflow",    group: 3, r: 10 },
+  { id: "sql",        group: 3, r: 11 },
   { id: "geospatial", group: 3, r: 10 },
+
+  // backend leaves
+  { id: "fastapi",    group: 4, r: 11 },
+  { id: "docker",     group: 4, r: 10 },
+  { id: "aws",        group: 4, r: 10 },
+
+  // react leaves
+  { id: "d3",         group: 5, r: 10 },
+  { id: "typescript", group: 5, r: 10 },
 ];
 
 const LINKS: Link[] = [
-  ["sangam", "python"],
-  ["sangam", "rag"],
-  ["sangam", "react"],
-  ["sangam", "pytorch"],
-  ["sangam", "supabase"],
-  ["sangam", "sql"],
-  ["python", "pandas"],
-  ["python", "pytorch"],
-  ["python", "fastapi"],
-  ["fastapi", "supabase"],
-  ["react", "d3"],
-  ["rag", "llms"],
-  ["rag", "nlp"],
-  ["llms", "n8n"],
-  ["n8n", "sangam"],
-  ["pytorch", "nlp"],
-  ["pandas", "sql"],
-  ["sangam", "geospatial"],
-  ["geospatial", "d3"],
+  // center → cluster anchors
+  ["sangam",   "python"],
+  ["sangam",   "rag"],
+  ["sangam",   "data eng"],
+  ["sangam",   "backend"],
+  ["sangam",   "react"],
+
+  // python cluster
+  ["python",   "pandas"],
+  ["python",   "sklearn"],
+  ["python",   "opencv"],
+  ["python",   "pytorch"],
+
+  // rag / llm cluster
+  ["rag",      "langchain"],
+  ["rag",      "chromadb"],
+  ["rag",      "n8n"],
+  ["rag",      "llms"],
+
+  // data eng cluster
+  ["data eng", "spark"],
+  ["data eng", "airflow"],
+  ["data eng", "sql"],
+  ["data eng", "geospatial"],
+
+  // backend cluster
+  ["backend",  "fastapi"],
+  ["backend",  "docker"],
+  ["backend",  "aws"],
+
+  // react cluster
+  ["react",    "d3"],
+  ["react",    "typescript"],
+
+  // cross-cluster edges
+  ["pytorch",   "sql"],
+  ["langchain", "n8n"],
+  ["sql",       "pandas"],
 ].map(([source, target]) => ({ source, target }));
+
 
 export function SkillGraph() {
   const ref = useRef<SVGSVGElement>(null);
