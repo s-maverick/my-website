@@ -1,25 +1,52 @@
 import { motion } from "framer-motion";
 
+// const groups = [
+//   {
+//     label: "languages",
+//     items: ["python", "sql", "r", "typescript", "javascript"],
+//   },
+//   {
+//     label: "ml / ai",
+//     items: ["pytorch", "scikit-learn", "huggingface", "spacy", "langchain", "openai"],
+//   },
+//   {
+//     label: "data",
+//     items: ["pandas", "numpy", "tidyverse", "duckdb", "postgres", "supabase"],
+//   },
+//   {
+//     label: "web / api",
+//     items: ["fastapi", "react", "next.js", "tanstack", "tailwind", "d3"],
+//   },
+//   {
+//     label: "ops / orchestration",
+//     items: ["n8n", "docker", "vercel", "github actions", "linux"],
+//   },
+// ];
+
 const groups = [
   {
     label: "languages",
-    items: ["python", "sql", "r", "typescript", "javascript"],
+    items: ["Python", "R", "SQL", "TypeScript", "JavaScript", "C", "C++"],
   },
   {
     label: "ml / ai",
-    items: ["pytorch", "scikit-learn", "huggingface", "spacy", "langchain", "openai"],
+    items: ["PyTorch", "scikit-learn", "HuggingFace", "LangChain", "LangGraph", "OpenAI API", "spaCy", "OpenCV"],
+  },
+  {
+    label: "llm & rag",
+    items: ["RAG Pipelines", "ChromaDB", "Vector Databases", "Prompt Engineering", "PEFT / QLoRA", "n8n"],
   },
   {
     label: "data",
-    items: ["pandas", "numpy", "tidyverse", "duckdb", "postgres", "supabase"],
+    items: ["Pandas", "NumPy", "Tidyverse", "DuckDB", "PostgreSQL", "Supabase", "Apache Spark", "DBT"],
   },
   {
     label: "web / api",
-    items: ["fastapi", "react", "next.js", "tanstack", "tailwind", "d3"],
+    items: ["FastAPI", "React", "Next.js", "TanStack", "Tailwind CSS", "D3.js", "Flask", "REST / GraphQL"],
   },
   {
     label: "ops / orchestration",
-    items: ["n8n", "docker", "vercel", "github actions", "linux"],
+    items: ["Docker", "Kubernetes", "Apache Airflow", "GitHub Actions", "AWS (S3, EC2)", "GCP", "Vercel", "Linux"],
   },
 ];
 

@@ -21,7 +21,7 @@ const work = [
     branch: "cartell",
     title: "Data Analyst · Deployment Team",
     where: "Cartell, Shippensburg, PA",
-    date: "Jan. 2025 — April 2025",
+    date: "Jan. 2025 — Dec. 2025",
     diff: [
       "+ architected end-to-end AI orchestration pipeline in n8n (PostgreSQL, AWS, K8s)",
       "+ engineered GPT-4o powered theft detection, anomaly flagging & risk assessment",
@@ -34,7 +34,7 @@ const work = [
     hash: "7b2e110",
     branch: "xresilient",
     title: "Co-Founder",
-    where: "XResilient · SXT IT Solution, Pune, MH",
+    where: "XResilient, A Venture by SXT IT Solution, Pune, MH",
     date: "Nov. 2023 — Present",
     diff: [
       "+ co-founded B2B services firm; scaled to 10+ enterprise clients in 8 months",
@@ -46,7 +46,7 @@ const work = [
   },
   {
     hash: "f1a0293",
-    branch: "ybi-foundation",
+    branch: "ybi foundation",
     title: "Data Scientist",
     where: "YBI Foundation, Pune, MH",
     date: "July 2023 — Sep. 2023",
@@ -58,7 +58,7 @@ const work = [
   },
   {
     hash: "c3b7742",
-    branch: "exposys-data-labs",
+    branch: "exposys data labs",
     title: "Data Scientist",
     where: "Exposys Data Labs, Pune, MH",
     date: "April 2023 — June 2023",
@@ -70,7 +70,7 @@ const work = [
   },
   {
     hash: "e9d5f30",
-    branch: "racksonsit · ml-eng",
+    branch: "racksonsit developers pvt. ltd.",
     title: "Machine Learning Engineer",
     where: "RacksonsIT Developers Pvt. Ltd., Pune, MH",
     date: "Oct. 2022 — March 2023",
@@ -82,7 +82,7 @@ const work = [
   },
   {
     hash: "b2c1190",
-    branch: "racksonsit · ds-intern",
+    branch: "racksonsit developers pvt. ltd.",
     title: "Data Scientist",
     where: "RacksonsIT Developers Pvt. Ltd., Pune, MH",
     date: "June 2020 — Aug. 2020",
@@ -99,8 +99,8 @@ const education = [
   {
     hash: "e91d4ac",
     branch: "UMASS · GRAD",
-    title: "Masters · Data Science and Analytics",
-    where: "University of Massachusetts Amherst",
+    title: "Master of Science in Data Science and Analytics",
+    where: "University of Massachusetts Amherst, MA",
     date: "Sep. 2024 — May 2026",
     diff: [
       "+ CGPA: 3.9 / 4.0",
@@ -112,8 +112,8 @@ const education = [
   {
     hash: "1f09a2a",
     branch: "VIT · UG",
-    title: "Bachelors · Artificial Intelligence & Data Science",
-    where: "VIT Pune",
+    title: "Bachelor of Science in Artificial Intelligence & Data Science",
+    where: "Vishwakarma Institute of Technology, Pune, MH",
     date: "Sep. 2020 — May 2024",
     diff: [
       "+ CGPA: 9.2 / 10.0",
@@ -125,8 +125,8 @@ const education = [
   {
     hash: "a3c0019",
     branch: "SIT · Diploma",
-    title: "Diploma · Computer Science and Engineering",
-    where: "SIT ICH",
+    title: "Diploma in Computer Science and Engineering",
+    where: "Sharad Institute of Technology, Ichalkaranji, MH",
     date: "Sep. 2018 — May 2020",
     diff: [
       "+ CGPA: 95.77 / 100.0",
