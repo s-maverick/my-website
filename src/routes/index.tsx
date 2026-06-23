@@ -45,7 +45,7 @@ function Index() {
       </main>
       <footer className="mx-auto max-w-7xl px-4 pb-16 pt-8 font-mono text-xs text-muted-foreground">
         <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border pt-6">
-          <span>© {new Date().getFullYear()} Sangam Patil · Built with ♥️</span>
+          <span>© {new Date().getFullYear()} Sangam Patil · WORK HARD DREAM BIG. · Built with ♥️</span>
           <span className="text-accent">eof</span>
         </div>
       </footer>

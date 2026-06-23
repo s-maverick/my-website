@@ -61,7 +61,7 @@ export function CursorGlow() {
 
   if (!enabled) return null;
 
-  return (
+return (
     <>
       <div
         ref={glow}
@@ -69,7 +69,7 @@ export function CursorGlow() {
         className="pointer-events-none fixed left-0 top-0 z-[60] h-[400px] w-[400px] rounded-full opacity-70 mix-blend-screen blur-2xl transition-opacity"
         style={{
           background:
-            "radial-gradient(circle, oklch(0.78 0.19 145 / 0.35) 0%, oklch(0.78 0.19 145 / 0.08) 40%, transparent 70%)",
+            "radial-gradient(circle, oklch(0.80 0.15 220 / 0.35) 0%, oklch(0.80 0.15 220 / 0.08) 40%, transparent 70%)",
         }}
       />
       <div
@@ -77,10 +77,10 @@ export function CursorGlow() {
         aria-hidden
         className="pointer-events-none fixed left-0 top-0 z-[61] h-2 w-2 rounded-full transition-[width,height,background-color,box-shadow] duration-150"
         style={{
-          backgroundColor: hot ? "oklch(0.78 0.19 145)" : "oklch(0.96 0.005 250)",
+          backgroundColor: hot ? "oklch(0.72 0.21 28)" : "oklch(0.96 0.005 250)",
           boxShadow: hot
-            ? "0 0 16px oklch(0.78 0.19 145 / 0.9), 0 0 32px oklch(0.78 0.19 145 / 0.5)"
-            : "0 0 8px oklch(0.96 0.005 250 / 0.6)",
+            ? "0 0 16px oklch(0.72 0.21 28 / 0.9), 0 0 32px oklch(0.72 0.21 28 / 0.5)"
+            : "0 0 8px oklch(0.80 0.005 250 / 0.6)",
           width: hot ? 14 : 8,
           height: hot ? 14 : 8,
         }}
@@ -88,3 +88,32 @@ export function CursorGlow() {
     </>
   );
 }
+
+
+//   return (
+//     <>
+//       <div
+//         ref={glow}
+//         aria-hidden
+//         className="pointer-events-none fixed left-0 top-0 z-[60] h-[400px] w-[400px] rounded-full opacity-70 mix-blend-screen blur-2xl transition-opacity"
+//         style={{
+//           background:
+//             "radial-gradient(circle, oklch(0.80 0.15 145 / 0.35) 0%, oklch(0.80 0.15 145 / 0.08) 40%, transparent 70%)",
+//         }}
+//       />
+//       <div
+//         ref={dot}
+//         aria-hidden
+//         className="pointer-events-none fixed left-0 top-0 z-[61] h-2 w-2 rounded-full transition-[width,height,background-color,box-shadow] duration-150"
+//         style={{
+//           backgroundColor: hot ? "oklch(0.80 0.15 145)" : "oklch(0.96 0.005 250)",
+//           boxShadow: hot
+//             ? "0 0 16px oklch(0.80 0.15 145 / 0.9), 0 0 32px oklch(0.80 0.15 145 / 0.5)"
+//             : "0 0 8px oklch(0.80 0.005 250 / 0.6)",
+//           width: hot ? 14 : 8,
+//           height: hot ? 14 : 8,
+//         }}
+//       />
+//     </>
+//   );
+// }

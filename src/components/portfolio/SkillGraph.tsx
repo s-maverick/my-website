@@ -161,7 +161,8 @@ export function SkillGraph() {
 
     const link = g
       .append("g")
-      .attr("stroke", "oklch(0.78 0.19 145 / 0.25)")
+      .attr("stroke", "oklch(0.80 0.15 220 / 0.55 )")
+      // .attr("stroke", "oklch(0.78 0.19 145 / 0.25)")
       .attr("stroke-width", 1)
       .selectAll("line")
       .data(sim.force<d3.ForceLink<Node, Link>>("link")!.links())
@@ -197,13 +198,17 @@ export function SkillGraph() {
       .attr("r", (d) => d.r)
       .attr("fill", (d) =>
         d.group === 0
-          ? "oklch(0.78 0.19 145)"
-          : "oklch(0.20 0.015 250)",
+          ? "oklch(0.80 0.15 220)"
+          : "oklch(0.20 0.15 250)",
+          // ? "oklch(0.78 0.19 145)"
+          // : "oklch(0.20 0.015 250)",
       )
       .attr("stroke", (d) =>
         d.group === 0
-          ? "oklch(0.78 0.19 145)"
-          : "oklch(0.78 0.19 145 / 0.5)",
+          ? "oklch(0.80 0.15 220 / 0.9)"
+          : "oklch(0.80 0.15 220 / 0.55 )",
+          // ? "oklch(0.78 0.19 145)"
+          // : "oklch(0.78 0.19 145 / 0.5)",
       )
       .attr("stroke-width", 1.25);
 

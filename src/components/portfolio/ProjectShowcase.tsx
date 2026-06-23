@@ -232,6 +232,8 @@ const projects = [
     blurb:
       "Tracks cryptocurrency transactions with blockchain technology. Combines data analytics and machine learning to surface patterns and anomalies across on-chain transaction flows.",
     stack: ["blockchain", "data analytics", "machine learning", "tracking"],
+    link: "https://www.taylorfrancis.com/chapters/edit/10.1201/9781003430421-17/cryptotrace-tracking-cryptocurrency-transactions-blockchain-technology-kuldeep-vayadande-sangam-patil-sayee-chauhan-tanuj-baware-rohit-gurav-sameer-naik",
+    linkLabel: "Springer",
     metrics: [
       { k: "domain", v: "crypto transactions" },
       { k: "technique", v: "ML + blockchain" },
@@ -245,6 +247,8 @@ const projects = [
     blurb:
       "Immutable land record management system leveraging blockchain for data integrity and Web3 interfaces for trustless verification of ownership and transfer history.",
     stack: ["blockchain", "Web3", "smart contracts"],
+    link: "https://doi.org/10.1051/itmconf/20225001006",
+    linkLabel: "Springer",
     metrics: [
       { k: "core property", v: "immutability" },
       { k: "use case", v: "land records" },
@@ -260,6 +264,8 @@ const projects = [
     blurb:
       "Techno-economic analysis of a hospital's transition to renewable energy. Models time-of-day tariff scheduling and evaluates financial and operational feasibility of the energy shift.",
     stack: ["techno-economic modeling", "time-of-day tariff", "SQL", "case study"],
+    link: "https://doi.org/10.1051/e3sconf/202345502022",
+    linkLabel: "Springer",
     metrics: [
       { k: "sector", v: "healthcare" },
       { k: "focus", v: "renewable transition" },

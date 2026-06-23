@@ -54,8 +54,10 @@ export function CodeRain({ className = "" }: { className?: string }) {
         const y = drops[i] * FONT_SIZE;
         const head = Math.random() > 0.975;
         ctx.fillStyle = head
-          ? "oklch(0.95 0.05 145 / 0.9)"
-          : "oklch(0.78 0.19 145 / 0.55)";
+          ? "oklch(0.80 0.15 220 / 0.9)"
+          : "oklch(0.80 0.15 220 / 0.55 )";
+          // ? "oklch(0.95 0.05 145 / 0.9)"
+          // : "oklch(0.78 0.19 145 / 0.55)";
         ctx.fillText(ch, x, y);
         if (y > height && Math.random() > 0.96) drops[i] = 0;
         drops[i] += 1;
@@ -85,7 +87,7 @@ export function CodeRain({ className = "" }: { className?: string }) {
     <canvas
       ref={ref}
       aria-hidden
-      className={`pointer-events-none absolute inset-0 h-full w-full opacity-[0.7] ${className}`}
+      className={`pointer-events-none absolute inset-0 h-full w-full opacity-[0.8] ${className}`}
     />
   );
 }

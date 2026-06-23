@@ -82,7 +82,7 @@ const work = [
   },
   {
     hash: "b2c1190",
-    branch: "racksonsit developers pvt. ltd.",
+    branch: "racksonsit developers pvt. ltd. → NULL",
     title: "Data Scientist",
     where: "RacksonsIT Developers Pvt. Ltd., Pune, MH",
     date: "June 2020 — Aug. 2020",
@@ -98,7 +98,7 @@ const work = [
 const education = [
   {
     hash: "e91d4ac",
-    branch: "UMASS · GRAD",
+    branch: "HEAD → UMASS · GRAD",
     title: "Master of Science in Data Science and Analytics",
     where: "University of Massachusetts Amherst, MA",
     date: "Sep. 2024 — May 2026",
@@ -124,7 +124,7 @@ const education = [
   
   {
     hash: "a3c0019",
-    branch: "SIT · Diploma",
+    branch: "SIT · Diploma → NULL",
     title: "Diploma in Computer Science and Engineering",
     where: "Sharad Institute of Technology, Ichalkaranji, MH",
     date: "Sep. 2018 — May 2020",
