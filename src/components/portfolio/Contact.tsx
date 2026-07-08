@@ -318,7 +318,7 @@ export function Contact() {
             {[
               { k: "email", v: "hello@sangampatil.com", href: "mailto:hello@sangampatil.com" },
               { k: "github", v: "s-maverick", href: "https://github.com/s-maverick" },
-              { k: "linkedin", v: "in/sangampatil29", href: "https://www.linkedin.com/in/sangampatil29/" },
+              { k: "linkedin", v: "in/sangampatil29", href: "https://www.linkedin.com/in/asangampatil/" },
               { k: "calendly", v: "asangampatil/30min", href: "https://calendly.com/asangampatil/30min/" },
               { k: "scholar.google", v: "sangampatil", href: "https://scholar.google.com/citations?user=-2fwlMQAAAAJ&hl=en/" },
             ].map((l) => (
