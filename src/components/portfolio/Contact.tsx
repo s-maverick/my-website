@@ -167,6 +167,8 @@
 import { useRef, useState } from "react";
 import { motion } from "framer-motion";
 import emailjs from "@emailjs/browser";
+import { Magnetic } from "./Magnetic";
+import { ScrambleText } from "./ScrambleText";
 
 const SERVICE_ID = "portfolio-service";
 const TEMPLATE_ID = "template_vt7y66t";
@@ -212,7 +214,7 @@ export function Contact() {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
         transition={{ duration: 0.5 }}
-        className="overflow-hidden rounded-xl border border-border bg-surface/40"
+        className="gradient-border overflow-hidden rounded-xl shadow-[0_0_60px_-20px_var(--color-accent)]"
       >
         <div className="border-b border-border bg-surface px-4 py-2 font-mono text-xs text-muted-foreground">
           sangam@portfolio:~$ ./contact.sh
@@ -220,7 +222,7 @@ export function Contact() {
         <div className="p-6 sm:p-10">
           <p className="font-mono text-sm text-accent">// contact</p>
           <h2 className="mt-2 font-display text-3xl text-foreground sm:text-4xl md:text-5xl">
-            got a hard problem? send it.
+            <ScrambleText text="got a hard problem? send it." />
           </h2>
           <p className="mt-3 max-w-xl text-muted-foreground">
             best for: ml/ai contract work, founding/early eng roles, research
@@ -228,9 +230,14 @@ export function Contact() {
           </p>
 
           {status === "sent" ? (
-            <div className="mt-8 rounded-md border border-accent/40 bg-accent/10 p-4 font-mono text-sm text-accent">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.96, filter: "blur(6px)" }}
+              animate={{ opacity: 1, scale: 1, filter: "blur(0px)", transitionEnd: { filter: "none" } }}
+              transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+              className="mt-8 rounded-md border border-accent/40 bg-accent/10 p-4 font-mono text-sm text-accent shadow-[0_0_30px_-10px_var(--color-accent)]"
+            >
               &gt; message queued. reply eta: &lt;24h.
-            </div>
+            </motion.div>
           ) : (
             <form 
               ref={formRef} 
@@ -304,13 +311,15 @@ export function Contact() {
                 </p>
               )}
 
-              <button
-                type="submit"
-                disabled={status === "sending"}
-                className="inline-flex items-center gap-2 rounded-md bg-accent px-5 py-2.5 font-mono text-sm font-medium text-accent-foreground transition-opacity hover:opacity-90 disabled:opacity-50"
-              >
-                {status === "sending" ? "sending..." : "./send →"}
-              </button>
+              <Magnetic>
+                <button
+                  type="submit"
+                  disabled={status === "sending"}
+                  className="inline-flex items-center gap-2 rounded-md bg-accent px-5 py-2.5 font-mono text-sm font-medium text-accent-foreground shadow-[0_0_24px_-6px_var(--color-accent)] transition-[opacity,box-shadow] hover:opacity-90 hover:shadow-[0_0_36px_-4px_var(--color-accent)] disabled:opacity-50"
+                >
+                  {status === "sending" ? "sending..." : "./send →"}
+                </button>
+              </Magnetic>
             </form>
           )}
 

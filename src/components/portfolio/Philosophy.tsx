@@ -1,4 +1,5 @@
-import { motion } from "framer-motion";
+import { SectionHeading } from "./SectionHeading";
+import { TiltCard } from "./TiltCard";
 
 const principles = [
   {
@@ -24,23 +25,26 @@ const principles = [
 export function Philosophy() {
   return (
     <section id="philosophy" className="mx-auto max-w-7xl px-4 py-24">
-      <div className="mb-12">
-        <p className="font-mono text-sm text-accent">// the operating system</p>
-        <h2 className="mt-2 font-display text-3xl text-foreground sm:text-4xl md:text-5xl">
-          three rules I actually follow
-        </h2>
-      </div>
+      <SectionHeading eyebrow="// the operating system" title="three rules I actually follow" />
 
       <div className="grid gap-5 md:grid-cols-3">
         {principles.map((p, i) => (
-          <motion.article
+          <TiltCard
+            as="article"
             key={p.n}
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
+            initial={{ opacity: 0, y: 40, filter: "blur(8px)" }}
+            whileInView={{ opacity: 1, y: 0, filter: "blur(0px)", transitionEnd: { filter: "none" } }}
             viewport={{ once: true, margin: "-80px" }}
-            transition={{ duration: 0.5, delay: i * 0.1 }}
-            className="group card-lift relative flex flex-col rounded-xl border border-border bg-surface/40 p-6"
+            transition={{ duration: 0.7, delay: i * 0.12, ease: [0.16, 1, 0.3, 1] }}
+            className="group card-lift flex flex-col overflow-hidden rounded-xl border border-border bg-surface/40 p-6 backdrop-blur-sm"
           >
+            {/* oversized index number in the background */}
+            <span
+              aria-hidden
+              className="pointer-events-none absolute -right-2 -top-6 select-none font-display text-[7rem] leading-none text-accent/[0.06] transition-all duration-500 group-hover:-translate-x-2 group-hover:text-accent/[0.12]"
+            >
+              {p.n}
+            </span>
             <div className="flex items-center justify-between font-mono text-xs text-muted-foreground">
               <span>rule_{p.n}.md</span>
               <span className="text-accent">●</span>
@@ -54,7 +58,7 @@ export function Philosophy() {
             <div className="mt-6 border-t border-border pt-4 font-mono text-[11px] text-muted-foreground">
               <span className="text-accent">$ proof</span> — {p.proof}
             </div>
-          </motion.article>
+          </TiltCard>
         ))}
       </div>
     </section>

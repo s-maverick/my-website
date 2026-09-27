@@ -1,4 +1,8 @@
-import { motion } from "framer-motion";
+import { useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import { SectionHeading } from "./SectionHeading";
+import { TiltCard } from "./TiltCard";
+import { CountUp } from "./CountUp";
 
 const projects = [
   // ── LLM / AI ──────────────────────────────────────────────────
@@ -362,31 +366,85 @@ function ProjectLinkBadge({ link, linkLabel }: { link: string; linkLabel: string
   );
 }
 
+// ── Filters ────────────────────────────────────────────────────────────────
+
+type Project = (typeof projects)[number];
+
+const FILTERS: { label: string; match: (p: Project) => boolean }[] = [
+  { label: "all", match: () => true },
+  { label: "llm/ai", match: (p) => /\b(llm|ai|nlp|prompt)\b/.test(p.tag) },
+  { label: "ml/stats", match: (p) => /\b(ml|statistics|forecasting)\b/.test(p.tag) },
+  { label: "data-eng", match: (p) => /etl|data engineering|sql|geospatial|backend/.test(p.tag) },
+  { label: "vision", match: (p) => p.tag.includes("vision") },
+  { label: "web3", match: (p) => /web3|blockchain/.test(p.tag) },
+  { label: "published", match: (p) => p.linkLabel === "Springer" || p.linkLabel === "IEEE" },
+];
+
 // ── Main export ────────────────────────────────────────────────────────────
 
 export function ProjectShowcase() {
+  const [filter, setFilter] = useState(FILTERS[0]);
+  const shown = projects.filter(filter.match);
+
   return (
     <section id="work" className="relative py-24">
-      <div className="mx-auto mb-12 max-w-7xl px-4">
-        <p className="font-mono text-sm text-accent">// selected work</p>
-        <h2 className="mt-2 font-display text-3xl text-foreground sm:text-4xl md:text-5xl">
-          things i shipped that someone used.
-        </h2>
-        <p className="mt-3 max-w-2xl text-muted-foreground">
-          academic, founder, and contract work. each one solved a real problem
-          for a real person — usually with a deadline.
-        </p>
+      <div className="mx-auto max-w-7xl px-4">
+        <SectionHeading eyebrow="// selected work" title="things i shipped that someone used." className="mb-8">
+          <p className="mt-3 max-w-2xl text-muted-foreground">
+            academic, founder, and contract work. each one solved a real problem
+            for a real person — usually with a deadline.
+          </p>
+        </SectionHeading>
+
+        <div className="mb-8 flex flex-wrap items-center gap-2 font-mono text-xs">
+          <span className="mr-1 text-muted-foreground">
+            <span className="text-accent">$</span> ls ~/projects --filter=
+          </span>
+          {FILTERS.map((f) => {
+            const on = f.label === filter.label;
+            return (
+              <button
+                key={f.label}
+                type="button"
+                aria-pressed={on}
+                onClick={() => setFilter(f)}
+                className={`relative rounded-md border px-2.5 py-1 transition-colors ${
+                  on
+                    ? "border-accent text-accent-foreground"
+                    : "border-border bg-background/60 text-muted-foreground hover:border-accent/50 hover:text-accent"
+                }`}
+              >
+                {on && (
+                  <motion.span
+                    layoutId="project-filter"
+                    className="absolute inset-0 rounded-[5px] bg-accent"
+                    transition={{ type: "spring", stiffness: 400, damping: 32 }}
+                  />
+                )}
+                <span className="relative">{f.label}</span>
+              </button>
+            );
+          })}
+          <span className="ml-auto text-muted-foreground" aria-live="polite">
+            {shown.length}/{projects.length}
+          </span>
+        </div>
       </div>
 
-      <div className="mx-auto grid max-w-7xl gap-5 px-4 md:grid-cols-2">
-        {projects.map((p, i) => (
-          <motion.article
+      <motion.div layout className="mx-auto grid max-w-7xl gap-5 px-4 md:grid-cols-2">
+        <AnimatePresence mode="popLayout">
+        {shown.map((p, i) => (
+          <TiltCard
+            as="article"
             key={p.slug}
+            layout
             initial={{ opacity: 0, y: 24 }}
             whileInView={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.94, transition: { duration: 0.2 } }}
             viewport={{ once: true, margin: "-100px" }}
             transition={{ duration: 0.5, delay: (i % 2) * 0.08 }}
-            className="group card-lift relative overflow-hidden rounded-xl border border-border bg-surface/40"
+            max={5}
+            className="group card-lift overflow-hidden rounded-xl border border-border bg-surface/40 backdrop-blur-sm"
           >
             {/* terminal header */}
             <div className="flex items-center justify-between border-b border-border bg-surface px-4 py-2 font-mono text-xs">
@@ -418,10 +476,11 @@ export function ProjectShowcase() {
               </p>
 
               <div className="mt-5 flex flex-wrap gap-1.5">
-                {p.stack.map((s) => (
+                {p.stack.map((s, si) => (
                   <span
                     key={s}
-                    className="rounded-md border border-border bg-background px-2 py-0.5 font-mono text-[10px] text-muted-foreground transition-colors group-hover:border-accent/30 group-hover:text-accent"
+                    style={{ transitionDelay: `${si * 30}ms` }}
+                    className="rounded-md border border-border bg-background px-2 py-0.5 font-mono text-[10px] text-muted-foreground transition-[color,border-color,transform] group-hover:-translate-y-0.5 group-hover:border-accent/30 group-hover:text-accent"
                   >
                     {s}
                   </span>
@@ -431,7 +490,9 @@ export function ProjectShowcase() {
               <div className="mt-6 grid grid-cols-3 gap-3 border-t border-border pt-5 font-mono">
                 {p.metrics.map((m) => (
                   <div key={m.k}>
-                    <div className="text-lg text-foreground">{m.v}</div>
+                    <div className="text-lg text-foreground">
+                      <CountUp value={m.v} />
+                    </div>
                     <div className="mt-0.5 text-[10px] uppercase tracking-wider text-muted-foreground">
                       {m.k}
                     </div>
@@ -439,9 +500,16 @@ export function ProjectShowcase() {
                 ))}
               </div>
             </div>
-          </motion.article>
+
+            {/* scan line that sweeps across the card on hover */}
+            <span
+              aria-hidden
+              className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-accent to-transparent opacity-0 transition-all duration-700 group-hover:top-full group-hover:opacity-100"
+            />
+          </TiltCard>
         ))}
-      </div>
+        </AnimatePresence>
+      </motion.div>
     </section>
   );
 }

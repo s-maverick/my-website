@@ -1,4 +1,6 @@
+import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
+import { MotionConfig } from "framer-motion";
 import { Nav } from "@/components/portfolio/Nav";
 import { StatusBar } from "@/components/portfolio/StatusBar";
 import { Hero } from "@/components/portfolio/Hero";
@@ -8,6 +10,9 @@ import { Timeline } from "@/components/portfolio/Timeline";
 import { Stack } from "@/components/portfolio/Stack";
 import { Contact } from "@/components/portfolio/Contact";
 import { CursorGlow } from "@/components/portfolio/CursorGlow";
+import { Background3D } from "@/components/portfolio/Background3D";
+import { BootSequence, shouldShowBoot } from "@/components/portfolio/BootSequence";
+import { ScrollProgress } from "@/components/portfolio/ScrollProgress";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -30,26 +35,35 @@ export const Route = createFileRoute("/")({
 });
 
 function Index() {
+  const [booted, setBooted] = useState(() => !shouldShowBoot());
+
   return (
-    <div className="relative min-h-screen overflow-x-hidden bg-background text-foreground">
-      <CursorGlow />
-      <Nav />
-      <main>
-        <Hero />
-        <Philosophy />
-        <Timeline />
-        <ProjectShowcase />
-        {/* <Timeline /> */}
-        <Stack />
-        <Contact />
-      </main>
-      <footer className="mx-auto max-w-7xl px-4 pb-16 pt-8 font-mono text-xs text-muted-foreground">
-        <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border pt-6">
-          <span>© {new Date().getFullYear()} Sangam Patil · WORK HARD DREAM BIG. · Built with ♥️</span>
-          <span className="text-accent">eof</span>
-        </div>
-      </footer>
-      <StatusBar />
-    </div>
+    <MotionConfig reducedMotion="user">
+      <div className="relative min-h-screen overflow-x-hidden bg-background text-foreground">
+        {!booted && <BootSequence onDone={() => setBooted(true)} />}
+        <Background3D active={booted} />
+        <ScrollProgress />
+        <CursorGlow />
+        <Nav />
+        {/* z-10 keeps content above the fixed WebGL layer */}
+        <main className="relative z-10">
+          {/* remount after the intro so the hero's entrance plays in view */}
+          <Hero key={booted ? "live" : "boot"} />
+          <Philosophy />
+          <Timeline />
+          <ProjectShowcase />
+          {/* <Timeline /> */}
+          <Stack />
+          <Contact />
+        </main>
+        <footer className="relative z-10 mx-auto max-w-7xl px-4 pb-16 pt-8 font-mono text-xs text-muted-foreground">
+          <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border pt-6">
+            <span>© {new Date().getFullYear()} Sangam Patil · WORK HARD DREAM BIG. · Built with ♥️</span>
+            <span className="text-accent">eof</span>
+          </div>
+        </footer>
+        <StatusBar />
+      </div>
+    </MotionConfig>
   );
 }

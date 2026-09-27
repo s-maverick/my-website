@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react";
 
 /**
  * Subtle background canvas: drifting characters in the accent color.
- * Sits behind content, low opacity. Pauses when off-screen.
+ * Sits behind content, low opacity, transparent between glyphs. Pauses when off-screen.
  */
 const GLYPHS = "01{}<>[]()=>;:#$%&*+-/\\|λπΣ∂∇".split("");
 
@@ -44,8 +44,11 @@ export function CodeRain({ className = "" }: { className?: string }) {
       }
       last = t;
       const { width, height } = canvas.getBoundingClientRect();
-      ctx.fillStyle = "oklch(0.16 0.012 250 / 0.18)";
+      // erase toward transparent (not toward the bg color) so layers behind show through
+      ctx.globalCompositeOperation = "destination-out";
+      ctx.fillStyle = "rgb(0 0 0 / 0.18)";
       ctx.fillRect(0, 0, width, height);
+      ctx.globalCompositeOperation = "source-over";
 
       ctx.font = `${FONT_SIZE}px JetBrains Mono, monospace`;
       for (let i = 0; i < cols; i++) {

@@ -1,4 +1,6 @@
-import { motion } from "framer-motion";
+import { useRef } from "react";
+import { motion, useScroll, useSpring } from "framer-motion";
+import { SectionHeading } from "./SectionHeading";
 
 
 const work = [
@@ -208,12 +210,17 @@ const education = [
 // }
 
 function CommitList({ items, prompt }: { items: typeof work; prompt: string }) {
+  const list = useRef<HTMLDivElement>(null);
+  // the git-graph rail fills in as the list scrolls through the viewport
+  const { scrollYProgress } = useScroll({ target: list, offset: ["start 0.75", "end 0.6"] });
+  const railFill = useSpring(scrollYProgress, { stiffness: 120, damping: 30, restDelta: 0.001 });
+
   return (
-    <div className="overflow-hidden rounded-xl border border-border bg-surface/40">
+    <div className="overflow-hidden rounded-xl border border-border bg-surface/40 backdrop-blur-sm">
       <div className="border-b border-border bg-surface px-4 py-2 font-mono text-xs text-muted-foreground">
         {prompt}
       </div>
-      <div className="divide-y divide-border font-mono text-sm">
+      <div ref={list} className="relative divide-y divide-border font-mono text-sm">
         {items.map((c, i) => (
           <motion.div
             key={c.hash}
@@ -221,12 +228,20 @@ function CommitList({ items, prompt }: { items: typeof work; prompt: string }) {
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true, margin: "-60px" }}
             transition={{ duration: 0.4, delay: i * 0.08 }}
-            className="group flex flex-col gap-2 px-4 py-5 transition-colors hover:bg-surface"
+            className="group relative flex flex-col gap-2 py-5 pl-12 pr-4 transition-colors hover:bg-surface"
           >
+            {/* commit node on the rail */}
+            <motion.span
+              aria-hidden
+              initial={{ scale: 0.3, opacity: 0.3 }}
+              whileInView={{ scale: 1, opacity: 1 }}
+              viewport={{ margin: "0px 0px -40% 0px" }}
+              transition={{ type: "spring", stiffness: 400, damping: 18 }}
+              className="absolute left-[17px] top-[25px] size-[11px] rounded-full border-2 border-accent bg-background shadow-[0_0_12px_var(--color-accent)] transition-colors group-hover:bg-accent"
+            />
             {/* Top row: hash/badge on left, date on right */}
             <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1">
               <div className="flex items-center gap-3 text-accent">
-                <span>*</span>
                 <span className="text-foreground">{c.hash}</span>
                 <span className="rounded border border-accent/30 bg-accent/10 px-1.5 text-[10px] uppercase tracking-wider text-accent">
                   {c.branch}
@@ -254,6 +269,13 @@ function CommitList({ items, prompt }: { items: typeof work; prompt: string }) {
             </ul>
           </motion.div>
         ))}
+        {/* git-graph rail — last child so divide-y leaves it alone */}
+        <div aria-hidden className="absolute bottom-8 left-[22px] top-8 w-px bg-border">
+          <motion.div
+            className="h-full w-full origin-top bg-gradient-to-b from-accent via-accent to-accent-2 shadow-[0_0_10px_var(--color-accent)]"
+            style={{ scaleY: railFill }}
+          />
+        </div>
       </div>
     </div>
   );
@@ -262,19 +284,11 @@ function CommitList({ items, prompt }: { items: typeof work; prompt: string }) {
 export function Timeline() {
   return (
     <section id="experience" className="mx-auto max-w-7xl px-4 py-24">
-      <div className="mb-10">
-        <p className="font-mono text-sm text-accent">// work experience</p>
-        <h2 className="mt-2 font-display text-3xl text-foreground sm:text-4xl md:text-5xl">
-          git log --oneline --work
-        </h2>
-      </div>
+      <SectionHeading className="mb-10" eyebrow="// work experience" title="git log --oneline --work" />
       <CommitList items={work} prompt="~/work $ git log --graph --decorate" />
  
-      <div id="education" className="mb-10 mt-24">
-        <p className="font-mono text-sm text-accent">// education</p>
-        <h2 className="mt-2 font-display text-3xl text-foreground sm:text-4xl md:text-5xl">
-          git log --oneline --education
-        </h2>
+      <div id="education" className="mt-24">
+        <SectionHeading className="mb-10" eyebrow="// education" title="git log --oneline --education" />
       </div>
       <CommitList
         items={education}
