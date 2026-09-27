@@ -1,5 +1,7 @@
-import { useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import { useRef, useState } from "react";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { Magnetic } from "./Magnetic";
 import { SectionHeading } from "./SectionHeading";
 import { TiltCard } from "./TiltCard";
 import { CountUp } from "./CountUp";
@@ -380,14 +382,33 @@ const FILTERS: { label: string; match: (p: Project) => boolean }[] = [
   { label: "published", match: (p) => p.linkLabel === "Springer" || p.linkLabel === "IEEE" },
 ];
 
+// cards shown before "show more" — keeps the section short, especially on phones
+const COLLAPSED_LIMIT = { mobile: 3, desktop: 4 };
+
 // ── Main export ────────────────────────────────────────────────────────────
 
 export function ProjectShowcase() {
+  const section = useRef<HTMLElement>(null);
+  const reduce = useReducedMotion();
+  const isMobile = useIsMobile();
   const [filter, setFilter] = useState(FILTERS[0]);
+  const [expanded, setExpanded] = useState(false);
+
   const shown = projects.filter(filter.match);
+  const limit = isMobile ? COLLAPSED_LIMIT.mobile : COLLAPSED_LIMIT.desktop;
+  const visible = expanded ? shown : shown.slice(0, limit);
+  const hiddenCount = shown.length - visible.length;
+
+  const collapse = () => {
+    setExpanded(false);
+    // don't strand the reader far below the now-shorter grid
+    if ((section.current?.getBoundingClientRect().top ?? 0) < 0) {
+      section.current?.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" });
+    }
+  };
 
   return (
-    <section id="work" className="relative py-24">
+    <section ref={section} id="work" className="relative py-24">
       <div className="mx-auto max-w-7xl px-4">
         <SectionHeading eyebrow="// selected work" title="things i shipped that someone used." className="mb-8">
           <p className="mt-3 max-w-2xl text-muted-foreground">
@@ -396,8 +417,8 @@ export function ProjectShowcase() {
           </p>
         </SectionHeading>
 
-        <div className="mb-8 flex flex-wrap items-center gap-2 font-mono text-xs">
-          <span className="mr-1 text-muted-foreground">
+        <div className="-mx-4 mb-8 flex items-center gap-2 overflow-x-auto px-4 pb-1 font-mono text-xs [scrollbar-width:none] sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0 sm:pb-0">
+          <span className="mr-1 hidden shrink-0 text-muted-foreground sm:inline">
             <span className="text-accent">$</span> ls ~/projects --filter=
           </span>
           {FILTERS.map((f) => {
@@ -408,7 +429,7 @@ export function ProjectShowcase() {
                 type="button"
                 aria-pressed={on}
                 onClick={() => setFilter(f)}
-                className={`relative rounded-md border px-2.5 py-1 transition-colors ${
+                className={`relative shrink-0 rounded-md border px-2.5 py-1 transition-colors ${
                   on
                     ? "border-accent text-accent-foreground"
                     : "border-border bg-background/60 text-muted-foreground hover:border-accent/50 hover:text-accent"
@@ -425,15 +446,19 @@ export function ProjectShowcase() {
               </button>
             );
           })}
-          <span className="ml-auto text-muted-foreground" aria-live="polite">
+          <span className="ml-auto shrink-0 pl-2 text-muted-foreground" aria-live="polite">
             {shown.length}/{projects.length}
           </span>
         </div>
       </div>
 
-      <motion.div layout className="mx-auto grid max-w-7xl gap-5 px-4 md:grid-cols-2">
+      <motion.div
+        id="project-grid"
+        layout
+        className="mx-auto grid max-w-7xl gap-5 px-4 md:grid-cols-2"
+      >
         <AnimatePresence mode="popLayout">
-        {shown.map((p, i) => (
+        {visible.map((p, i) => (
           <TiltCard
             as="article"
             key={p.slug}
@@ -462,7 +487,7 @@ export function ProjectShowcase() {
               )}
             </div>
 
-            <div className="p-6">
+            <div className="p-5 sm:p-6">
               <div className="flex items-baseline justify-between gap-4">
                 <h3 className="font-display text-2xl text-foreground">
                   {p.title}
@@ -510,6 +535,32 @@ export function ProjectShowcase() {
         ))}
         </AnimatePresence>
       </motion.div>
+
+      {shown.length > limit && (
+        <div className="mx-auto mt-10 flex w-fit flex-col items-center gap-2 rounded-xl bg-background/75 px-4 py-3 font-mono backdrop-blur-md">
+          <Magnetic>
+            <button
+              type="button"
+              aria-expanded={expanded}
+              aria-controls="project-grid"
+              onClick={expanded ? collapse : () => setExpanded(true)}
+              className="group relative inline-flex items-center gap-2 overflow-hidden rounded-md border border-accent/50 bg-background px-5 py-2.5 text-sm text-accent shadow-[0_0_28px_-10px_var(--color-accent)] transition-colors hover:bg-accent hover:text-accent-foreground"
+            >
+              {expanded ? (
+                <>[ − show less ]</>
+              ) : (
+                <>
+                  [ + {hiddenCount} more project{hiddenCount === 1 ? "" : "s"}
+                  <span className="transition-transform group-hover:translate-y-0.5">↓</span> ]
+                </>
+              )}
+            </button>
+          </Magnetic>
+          <span className="text-[10px] uppercase tracking-wider text-muted-foreground">
+            showing {visible.length} of {shown.length}
+          </span>
+        </div>
+      )}
     </section>
   );
 }

@@ -8,22 +8,26 @@ function scramble(text: string) {
 }
 
 /**
- * Text that "decrypts" from random glyphs left-to-right when scrolled into view.
+ * Text that "decrypts" from random glyphs left-to-right when scrolled into view
+ * (or on mount with `immediate` — remount with a new key to replay).
  * Screen readers get the plain text; the animated copy is aria-hidden.
  * Designed for monospace fonts, where glyph swaps don't reflow the line.
  */
 export function ScrambleText({
   text,
   duration = 900,
+  immediate = false,
   className,
 }: {
   text: string;
   duration?: number;
+  immediate?: boolean;
   className?: string;
 }) {
   const ref = useRef<HTMLSpanElement>(null);
   const reduce = useReducedMotion();
   const inView = useInView(ref, { once: true, margin: "0px 0px -12% 0px" });
+  const play = immediate || inView;
   const initial = useMemo(
     () => (reduce ? text : scramble(text)),
     [text, reduce],
@@ -31,7 +35,7 @@ export function ScrambleText({
 
   useEffect(() => {
     const el = ref.current;
-    if (!el || !inView || reduce) return;
+    if (!el || !play || reduce) return;
 
     const chars = [...text];
     // each char resolves at a staggered time, with a little jitter
@@ -60,7 +64,7 @@ export function ScrambleText({
     };
     raf = requestAnimationFrame(frame);
     return () => cancelAnimationFrame(raf);
-  }, [inView, reduce, text, duration]);
+  }, [play, reduce, text, duration]);
 
   return (
     <span className={className}>

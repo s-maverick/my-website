@@ -1,7 +1,17 @@
 import { useEffect, useState } from "react";
+import { ScrambleText } from "./ScrambleText";
+import { SCENE_STATUS_EVENT, type SceneStatus } from "./scene/events";
 
 export function StatusBar() {
   const [time, setTime] = useState("");
+  // what the WebGL background is rendering right now
+  const [scene, setScene] = useState<SceneStatus | null>(null);
+  useEffect(() => {
+    const onStatus = (e: Event) => setScene((e as CustomEvent<SceneStatus>).detail);
+    window.addEventListener(SCENE_STATUS_EVENT, onStatus);
+    return () => window.removeEventListener(SCENE_STATUS_EVENT, onStatus);
+  }, []);
+
   useEffect(() => {
     const tick = () => {
       const d = new Date();
@@ -29,6 +39,15 @@ export function StatusBar() {
             online
           </span>
           <span className="hidden sm:inline">amherst, ma</span>
+          {scene && (
+            <span className="hidden items-center gap-1.5 normal-case lg:flex">
+              <span className="text-accent">render:</span>
+              <ScrambleText key={scene.shape} text={scene.shape} immediate duration={600} />
+              <span>
+                · {Math.round(scene.points / 1000)}k pts · {scene.fps} fps
+              </span>
+            </span>
+          )}
         </div>
         <div className="flex items-center gap-3">
           <span className="hidden md:inline">last_deploy: 14s ago</span>

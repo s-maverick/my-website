@@ -43,6 +43,8 @@
   --font-display: "Geist Mono", ui-monospace, monospace;
   --font-sans: "Inter Tight", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, monospace;
+
+  --animate-rgb-split: rgb-split 0.9s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 :root {
@@ -116,6 +118,19 @@
   }
 }
 
+/* chromatic aberration on the WebGL layer when the intro detonates */
+@keyframes rgb-split {
+  0% {
+    filter: drop-shadow(9px 0 0 oklch(0.72 0.21 28 / 0.75)) drop-shadow(-9px 0 0 oklch(0.80 0.15 220 / 0.75));
+  }
+  45% {
+    filter: drop-shadow(3px 0 0 oklch(0.72 0.21 28 / 0.45)) drop-shadow(-3px 0 0 oklch(0.80 0.15 220 / 0.45));
+  }
+  100% {
+    filter: drop-shadow(0 0 0 transparent) drop-shadow(0 0 0 transparent);
+  }
+}
+
 @keyframes caret-blink {
   to { visibility: hidden; }
 }
@@ -133,8 +148,11 @@
   }
 }
 
+/* the offset colour copies sit *behind* the text (instead of mix-blend-mode:
+   screen, which Chrome composites as an opaque box over a WebGL backdrop) */
 @utility glitch-name {
   position: relative;
+  isolation: isolate;
   color: var(--color-foreground);
   text-shadow:
     0 0 18px oklch(0.78 0.19 145 / 0.55),
@@ -146,20 +164,19 @@
     content: attr(data-text);
     position: absolute;
     inset: 0;
+    z-index: -1;
     pointer-events: none;
     background: transparent;
   }
   &::before {
     color: oklch(0.72 0.21 28);
     transform: translate(-2px, 0);
-    mix-blend-mode: screen;
     animation: glitch-shift-a 3.2s infinite steps(1);
     clip-path: polygon(0 0, 100% 0, 100% 45%, 0 45%);
   }
   &::after {
     color: oklch(0.78 0.19 200);
     transform: translate(2px, 0);
-    mix-blend-mode: screen;
     animation: glitch-shift-b 2.8s infinite steps(1);
     clip-path: polygon(0 55%, 100% 55%, 100% 100%, 0 100%);
   }

@@ -25,6 +25,15 @@ export function Hero() {
       className="relative mx-auto grid min-h-[92vh] max-w-7xl items-center gap-10 px-4 pb-20 pt-32 md:grid-cols-5 md:gap-12"
     >
       <motion.div style={{ y: copyY, opacity: copyOpacity }} className="relative z-10 md:col-span-3">
+        {/* soft scrim so the copy stays readable over the particles behind it */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -inset-x-16 -inset-y-10 -z-10"
+          style={{
+            background:
+              "radial-gradient(ellipse 60% 55% at 35% 50%, oklch(0.16 0.012 250 / 0.75), transparent 75%)",
+          }}
+        />
         <motion.p
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
