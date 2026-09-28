@@ -232,7 +232,7 @@ void main() {
   gl_Position = projectionMatrix * mv;
   computeStreak(gl_Position);
 
-  gl_PointSize = (0.035 + aRandom * 0.05) * (1.0 + shock * 2.0) * vStretch * uScale / -mv.z;
+  gl_PointSize = (0.028 + aRandom * 0.035) * (1.0 + shock * 2.0) * vStretch * uScale / -mv.z;
   vTwinkle = (0.35 + 0.65 * (0.5 + 0.5 * sin(uTime * (0.6 + aRandom * 1.8) + aRandom * 100.0)))
     * (1.0 + shock * 2.0 + push);
   vColor = mix(uAccent, uGreen, step(0.72, aRandom));
@@ -247,7 +247,7 @@ ${STREAK_FRAGMENT}
 void main() {
   float a = spriteMask();
   if (a < 0.01) discard;
-  gl_FragColor = vec4(vColor, a * vTwinkle * 0.55);
+  gl_FragColor = vec4(vColor, a * vTwinkle * 0.28);
 }
 `;
 
@@ -295,7 +295,7 @@ function DustField({ count, span }: { count: number; span: number }) {
 // ── floating wireframe solids ────────────────────────────────────────────
 
 type FloaterDef = {
-  shape: "octa" | "torus" | "ico" | "knot";
+  shape: "cube" | "db" | "octa" | "ico" | "torus";
   pos: [number, number, number];
   size: number;
   color: THREE.Color;
@@ -304,55 +304,90 @@ type FloaterDef = {
 
 // y is in "viewports of scroll" and gets multiplied by SCROLL_DEPTH
 const FLOATERS: FloaterDef[] = [
-  { shape: "octa", pos: [-4.2, -0.9, -2], size: 0.5, color: GREEN, spin: 0.3 },
+  { shape: "cube", pos: [-4.2, -0.9, -2], size: 0.45, color: GREEN, spin: 0.3 },
+  { shape: "db", pos: [4.6, -1.8, -3], size: 0.6, color: ACCENT, spin: -0.2 },
+  { shape: "ico", pos: [-5.0, -3.2, -4], size: 0.8, color: ACCENT, spin: 0.15 },
   {
-    shape: "torus",
-    pos: [4.6, -1.8, -3],
-    size: 0.7,
-    color: ACCENT,
-    spin: -0.2,
-  },
-  { shape: "ico", pos: [-5.0, -3.2, -4], size: 0.9, color: ACCENT, spin: 0.15 },
-  {
-    shape: "knot",
+    shape: "cube",
     pos: [5.0, -4.6, -3.5],
-    size: 0.55,
+    size: 0.5,
     color: GREEN,
     spin: 0.25,
   },
   { shape: "octa", pos: [-4.6, -6.4, -2.5], size: 0.6, color: HOT, spin: -0.3 },
-  { shape: "torus", pos: [4.4, -8.0, -3], size: 0.8, color: ACCENT, spin: 0.2 },
+  { shape: "db", pos: [4.4, -8.0, -3], size: 0.7, color: ACCENT, spin: 0.2 },
   {
-    shape: "ico",
+    shape: "torus",
     pos: [-4.8, -9.8, -3.5],
-    size: 0.7,
+    size: 0.6,
     color: GREEN,
     spin: -0.18,
   },
 ];
 
-function floaterGeometry(shape: FloaterDef["shape"]) {
+/** the classic database icon: stacked platter rings joined by four uprights */
+function databaseEdges() {
+  const pts: number[] = [];
+  const ring = 40;
+  for (const y of [-0.6, -0.2, 0.2, 0.6]) {
+    for (let k = 0; k < ring; k++) {
+      const a0 = (k / ring) * Math.PI * 2;
+      const a1 = ((k + 1) / ring) * Math.PI * 2;
+      pts.push(
+        Math.cos(a0) * 0.8,
+        y,
+        Math.sin(a0) * 0.8,
+        Math.cos(a1) * 0.8,
+        y,
+        Math.sin(a1) * 0.8,
+      );
+    }
+  }
+  for (let k = 0; k < 4; k++) {
+    const a = (k / 4) * Math.PI * 2;
+    pts.push(
+      Math.cos(a) * 0.8,
+      -0.6,
+      Math.sin(a) * 0.8,
+      Math.cos(a) * 0.8,
+      0.6,
+      Math.sin(a) * 0.8,
+    );
+  }
+  return new THREE.BufferGeometry().setAttribute(
+    "position",
+    new THREE.Float32BufferAttribute(pts, 3),
+  );
+}
+
+function floaterSolid(shape: Exclude<FloaterDef["shape"], "db">) {
   switch (shape) {
+    case "cube":
+      return new THREE.BoxGeometry(1.4, 1.4, 1.4);
     case "octa":
       return new THREE.OctahedronGeometry(1, 0);
-    case "torus":
-      return new THREE.TorusGeometry(1, 0.32, 10, 28);
     case "ico":
       return new THREE.IcosahedronGeometry(1, 0);
-    case "knot":
-      return new THREE.TorusKnotGeometry(0.8, 0.22, 64, 8);
+    case "torus":
+      return new THREE.TorusGeometry(1, 0.32, 10, 28);
   }
 }
 
 function Floater({ def }: { def: FloaterDef }) {
-  const ref = useRef<THREE.Mesh>(null);
+  const ref = useRef<THREE.LineSegments>(null);
   const wide = useThree((s) => s.size.width >= 768);
-  const geometry = useMemo(() => floaterGeometry(def.shape), [def.shape]);
+  // edges only (no triangle diagonals) for a clean CAD-wireframe look
+  const geometry = useMemo(() => {
+    if (def.shape === "db") return databaseEdges();
+    const solid = floaterSolid(def.shape);
+    const edges = new THREE.EdgesGeometry(solid, 10);
+    solid.dispose();
+    return edges;
+  }, [def.shape]);
   const material = useMemo(
     () =>
-      new THREE.MeshBasicMaterial({
+      new THREE.LineBasicMaterial({
         color: def.color,
-        wireframe: true,
         transparent: true,
         opacity: 0,
         depthWrite: false,
@@ -378,11 +413,11 @@ function Floater({ def }: { def: FloaterDef }) {
     m.rotation.x += delta * def.spin;
     m.rotation.y += delta * def.spin * 0.7;
     m.position.y = y + Math.sin(state.clock.elapsedTime * 0.5 + seed) * 0.15;
-    material.opacity = 0.14 * smoothstep(0.4, 1, frame.intro);
+    material.opacity = 0.12 * smoothstep(0.4, 1, frame.intro);
   });
 
   return (
-    <mesh
+    <lineSegments
       ref={ref}
       geometry={geometry}
       material={material}
@@ -424,7 +459,7 @@ function IntroFx() {
       new THREE.ShaderMaterial({
         uniforms: {
           uAlpha: { value: 0 },
-          uColor: { value: new THREE.Color("#c8f6ff") },
+          uColor: { value: new THREE.Color("#8fe6ff") },
         },
         vertexShader: flashVertex,
         fragmentShader: flashFragment,
@@ -471,7 +506,7 @@ function IntroFx() {
     g.position.set(0, frame.camY, 0.6);
 
     flashMat.uniforms.uAlpha.value =
-      (t < 0.07 ? t / 0.07 : Math.exp(-(t - 0.07) * 4.5)) * 1.4;
+      (t < 0.07 ? t / 0.07 : Math.exp(-(t - 0.07) * 4.5)) * 0.55;
     flash.current?.scale.setScalar(1.5 + t * 5);
 
     const clamp01 = (v: number) => Math.min(Math.max(v, 0), 1);
@@ -480,8 +515,8 @@ function IntroFx() {
     const tB = (t - 0.12) / 1.5;
     ringA.current?.scale.setScalar(0.05 + easeOut(tA) * 7);
     ringB.current?.scale.setScalar(0.05 + easeOut(tB) * 6);
-    ringMats[0].opacity = (1 - clamp01(tA)) ** 2 * 0.9;
-    ringMats[1].opacity = tB > 0 ? (1 - clamp01(tB)) ** 2 * 0.8 : 0;
+    ringMats[0].opacity = (1 - clamp01(tA)) ** 2 * 0.45;
+    ringMats[1].opacity = tB > 0 ? (1 - clamp01(tB)) ** 2 * 0.4 : 0;
   });
 
   return (
@@ -535,7 +570,7 @@ export default function Scene3D({
   onStart?: () => void;
 }) {
   useInputListeners();
-  const points = lite ? 6000 : 16000;
+  const points = lite ? 5000 : 12000;
 
   return (
     <Canvas
@@ -556,11 +591,7 @@ export default function Scene3D({
       {FLOATERS.map((f, i) => (
         <Floater key={i} def={f} />
       ))}
-      <MorphEntity
-        count={points}
-        nodes={lite ? 120 : 240}
-        surfaceLines={lite ? 22 : 32}
-      />
+      <MorphEntity count={points} surfaceLines={lite ? 20 : 28} />
       <IntroFx />
     </Canvas>
   );

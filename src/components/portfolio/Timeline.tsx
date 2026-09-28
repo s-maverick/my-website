@@ -216,7 +216,7 @@ function CommitList({ items, prompt }: { items: typeof work; prompt: string }) {
   const railFill = useSpring(scrollYProgress, { stiffness: 120, damping: 30, restDelta: 0.001 });
 
   return (
-    <div className="overflow-hidden rounded-xl border border-border bg-surface/40 backdrop-blur-sm">
+    <div className="overflow-hidden rounded-xl border border-border bg-surface/40 backdrop-blur-sm xl:mr-[22rem]">
       <div className="border-b border-border bg-surface px-4 py-2 font-mono text-xs text-muted-foreground">
         {prompt}
       </div>

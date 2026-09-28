@@ -1,5 +1,5 @@
 // Shared GLSL chunks. Include order in a vertex shader:
-//   uniforms (incl. uTime) → NOISE → HELPERS → CORE → WORLD_FX → STREAK_VERTEX
+//   uniforms (incl. uTime) → NOISE → HELPERS → WORLD_FX → STREAK_VERTEX
 
 // Ashima 3D simplex noise (MIT) — https://github.com/ashima/webgl-noise
 export const NOISE = /* glsl */ `
@@ -55,16 +55,6 @@ vec3 rotY(vec3 p, float a) { float c = cos(a), s = sin(a); return vec3(c * p.x +
 vec3 rotZ(vec3 p, float a) { float c = cos(a), s = sin(a); return vec3(c * p.x - s * p.y, s * p.x + c * p.y, p.z); }
 vec3 hash3(float n) {
   return fract(sin(vec3(n, n + 1.7, n + 3.1)) * vec3(43758.5453, 22578.1459, 19642.349));
-}
-`;
-
-/** The breathing neural-core surface. Particles, synapses and neurons all use it. */
-export const CORE = /* glsl */ `
-vec3 corePosition(vec3 base, out float n) {
-  float len = length(base);
-  vec3 dir = base / max(len, 1e-4);
-  n = snoise(dir * 1.6 + vec3(0.0, 0.0, uTime * 0.22));
-  return rotY(dir * len * (1.0 + n * 0.22), uTime * 0.08);
 }
 `;
 

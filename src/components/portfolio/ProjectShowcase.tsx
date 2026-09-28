@@ -455,7 +455,7 @@ export function ProjectShowcase() {
       <motion.div
         id="project-grid"
         layout
-        className="mx-auto grid max-w-7xl gap-5 px-4 md:grid-cols-2"
+        className="mx-auto grid max-w-7xl gap-5 px-4 md:grid-cols-2 xl:pr-[23rem]"
       >
         <AnimatePresence mode="popLayout">
         {visible.map((p, i) => (
@@ -537,6 +537,7 @@ export function ProjectShowcase() {
       </motion.div>
 
       {shown.length > limit && (
+        <div className="mx-auto max-w-7xl px-4 xl:pr-[23rem]">
         <div className="mx-auto mt-10 flex w-fit flex-col items-center gap-2 rounded-xl bg-background/75 px-4 py-3 font-mono backdrop-blur-md">
           <Magnetic>
             <button
@@ -559,6 +560,7 @@ export function ProjectShowcase() {
           <span className="text-[10px] uppercase tracking-wider text-muted-foreground">
             showing {visible.length} of {shown.length}
           </span>
+        </div>
         </div>
       )}
     </section>

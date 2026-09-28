@@ -4,8 +4,8 @@ import { AnimatePresence, motion } from "framer-motion";
 const LINES = [
   "> booting sangam.os v2.6",
   "[ ok ] mounting /experience /education /projects",
-  "[ ok ] compiling neural_core.glsl",
-  "[ ok ] loading 16 shipped projects",
+  "[ ok ] compiling shaders: mlp · soc · git_graph",
+  "[ ok ] indexing shipped projects",
   "[ ok ] calibrating vibes",
   "> ready.",
 ];

@@ -2,28 +2,14 @@ import { useEffect, useMemo, useRef } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
 import {
-  CORE,
   HELPERS,
   NOISE,
   STREAK_FRAGMENT,
   STREAK_VERTEX,
   WORLD_FX,
 } from "./glsl";
-import {
-  buildEntityGeometry,
-  buildSynapses,
-  PLACEMENTS,
-  SHAPES,
-} from "./shapes";
-import {
-  ACCENT,
-  GREEN,
-  additiveShader,
-  frame,
-  input,
-  shared,
-  smoothstep,
-} from "./state";
+import { buildEntityGeometry, PLACEMENTS, SHAPES } from "./shapes";
+import { additiveShader, frame, input, shared } from "./state";
 
 // ── particle entity ──────────────────────────────────────────────────────
 
@@ -39,77 +25,109 @@ uniform vec3 uAccent;
 uniform vec3 uGreen;
 uniform vec3 uHot;
 
-attribute vec3 aLorenz;
-attribute vec3 aHelix;
-attribute vec3 aGalaxy;
-attribute vec3 aSurface;
-attribute vec3 aVortex;
-attribute vec2 aMeta; // x: random 0..1, y: index / count
+// xyz + a per-shape param (see shapes.ts for what each param means)
+attribute vec4 aChip;
+attribute vec4 aGit;
+attribute vec4 aBars;
+attribute vec4 aLoss;
+attribute vec4 aGlobe;
+attribute vec4 aMeta; // x: random 0..1, y: seed, z: neural-net layer progress
 
 varying vec3 vColor;
 varying float vAlpha;
 
 ${NOISE}
 ${HELPERS}
-${CORE}
 ${WORLD_FX}
 ${STREAK_VERTEX}
 
-// position, colour and glow of this particle in shape idx (see shapes.ts)
+// a looping pulse travelling along a 0..1 param
+float pulse(float t, float speed, float phase, float sharpness) {
+  return pow(fract(t - uTime * speed + phase), sharpness);
+}
+
+// position, colour and glow of this particle in shape idx
 void shape(float idx, out vec3 p, out vec3 c, out float glow) {
-  float rnd = aMeta.x;
-  float seq = aMeta.y;
   glow = 0.0;
 
   if (idx < 0.5) {
-    // neural core: breathing noise sphere with the odd hot spark
-    float n;
-    p = corePosition(position, n);
-    c = mix(uAccent, uGreen, smoothstep(0.35, 0.8, n * 0.5 + 0.5));
-    glow = step(0.985, rnd) * (0.5 + 0.5 * sin(uTime * 3.0 + rnd * 60.0));
-    c = mix(c, uHot, glow);
+    // neural network: a forward pass sweeps up through the layers
+    p = rotX(rotY(position, uTime * 0.15), 0.32);
+    float front = fract(uTime * 0.2) * 1.3 - 0.15;
+    float d = aMeta.z - front;
+    glow = exp(-d * d * 200.0);
+    c = mix(uAccent, uGreen, aMeta.z);
   } else if (idx < 1.5) {
-    // lorenz attractor on a turntable; pulses of light run along the trajectory
-    p = rotY(aLorenz, uTime * 0.12);
-    c = mix(uAccent, uGreen, smoothstep(-0.5, 0.5, aLorenz.x));
-    glow = pow(fract(seq * 30.0 - uTime * 0.12), 14.0);
+    // cpu die: signals leave the package along each trace
+    p = rotX(rotY(aChip.xyz, sin(uTime * 0.2) * 0.35), -0.6);
+    float w = aChip.w;
+    if (w >= 0.0) {
+      glow = pulse(fract(w), 0.45, floor(w) * 0.618, 22.0);
+      c = mix(uAccent * 0.75, uGreen, glow);
+    } else if (w > -1.5) {
+      c = uAccent; // package + pins
+    } else if (w > -2.5) {
+      c = uGreen * 0.9; // cores, busy
+      glow = 0.2 + 0.2 * sin(uTime * 2.0 + p.x * 8.0);
+    } else if (w > -3.5) {
+      c = uHot * 0.9; // vias
+      glow = 0.3;
+    } else {
+      c = uAccent * 0.3; // silicon
+    }
   } else if (idx < 2.5) {
-    // double helix; data streams up the strands
-    p = rotZ(rotY(aHelix, uTime * 0.35), 0.18);
-    float strandB = step(0.4, seq) * (1.0 - step(0.8, seq));
-    float rung = step(0.8, seq);
-    c = mix(mix(uAccent, uGreen, strandB), uHot, rung * 0.7);
-    glow = pow(fract(aHelix.y * 0.5 - uTime * 0.3 + strandB * 0.5), 12.0) * (1.0 - rung);
+    // git graph: commits flow upward along every branch
+    p = rotX(rotY(aGit.xyz, sin(uTime * 0.3) * 0.6), 0.12);
+    float base = floor(aGit.w);
+    float commit = step(3.5, base);
+    float lane = base - 4.0 * commit;
+    c = lane < 0.5 ? uAccent : lane < 1.5 ? uGreen : lane < 2.5 ? mix(uAccent, uGreen, 0.5) : uHot;
+    c *= mix(0.7, 1.1, commit);
+    glow = pulse(fract(aGit.w) * 3.0, 0.25, 0.0, 16.0) * (1.0 - commit * 0.5) + commit * 0.2;
   } else if (idx < 3.5) {
-    // spiral galaxy with differential rotation — the core spins faster
-    float r = length(aGalaxy.xz);
-    p = rotY(aGalaxy, uTime * 0.3 / (0.3 + r));
-    p = rotZ(rotX(p, 0.65), 0.22);
-    c = mix(vec3(1.0, 0.8, 0.7), uHot, smoothstep(0.0, 0.25, r));
-    c = mix(c, uAccent, smoothstep(0.15, 0.7, r));
-    c = mix(c, uGreen, smoothstep(0.9, 1.8, r) * step(0.4, rnd));
-    glow = (1.0 - smoothstep(0.0, 0.35, r)) * 0.25;
+    // live bar chart: every bar's height keeps updating
+    float y = aBars.y;
+    float h = 0.0;
+    if (aBars.w >= 1.0) {
+      float id = aBars.w - 1.0;
+      float seed = fract(sin(id * 12.9898) * 43758.5453);
+      h = 0.18 + 0.95 * seed * (0.55 + 0.45 * sin(uTime * 0.8 + id * 0.7));
+      y = aBars.y * h;
+      c = mix(uGreen, uAccent, smoothstep(0.2, 0.7, h));
+      c = mix(c, uHot, smoothstep(0.75, 1.05, h));
+      glow = smoothstep(0.97, 1.0, aBars.y) * 0.3; // bar tops
+    } else {
+      c = uAccent * 0.4; // floor grid + axis
+    }
+    p = rotX(rotY(vec3(aBars.x, y - 0.5, aBars.z), uTime * 0.12), 0.45);
   } else if (idx < 4.5) {
-    // loss landscape: bowl + a deep minimum + drifting ripples
-    float x = aSurface.x;
-    float z = aSurface.z;
+    // loss landscape with the optimiser's trajectory descending into the minimum
+    float x = aLoss.x;
+    float z = aLoss.z;
     float y = 0.12 * (x * x + z * z)
       - 0.6 * exp(-((x - 0.5) * (x - 0.5) + (z + 0.3) * (z + 0.3)) * 2.0)
-      + 0.08 * sin(3.0 * x + uTime * 0.8) * cos(2.6 * z + uTime * 0.6);
+      + 0.06 * sin(3.0 * x + uTime * 0.8) * cos(2.6 * z + uTime * 0.6);
+    float path = step(0.0, aLoss.w);
+    y += path * 0.04;
     p = rotX(rotY(vec3(x, y, z), uTime * 0.06), 0.6);
-    c = mix(uGreen, uAccent, smoothstep(-0.45, 0.5, y));
-    c = mix(c, uHot, smoothstep(0.45, 0.75, y));
-    // the global minimum pulses — "converged"
-    glow = (1.0 - smoothstep(0.0, 0.35, length(vec2(x - 0.5, z + 0.3)))) * (0.6 + 0.4 * sin(uTime * 2.0));
+    c = mix(uGreen, uAccent, smoothstep(-0.45, 0.5, y)) * 0.7;
+    c = mix(c, uHot * 0.8, smoothstep(0.45, 0.75, y));
+    c = mix(c, uHot, path * 0.6);
+    glow = path * (0.2 + pulse(aLoss.w, 0.15, 0.0, 30.0) * 1.2);
+    glow += (1.0 - smoothstep(0.0, 0.3, length(vec2(x - 0.5, z + 0.3)))) * 0.3 * (1.0 - path);
   } else {
-    // vortex ring: particles roll around the tube while the ring turns
-    float u = aVortex.x + uTime * 0.12;
-    float v = aVortex.y + uTime * 0.9;
-    float rr = 0.32 * aVortex.z;
-    p = vec3((1.0 + rr * cos(v)) * cos(u), rr * sin(v), (1.0 + rr * cos(v)) * sin(u));
-    p = rotX(p, 1.2);
-    c = mix(uAccent, uGreen, 0.5 + 0.5 * cos(v));
-    glow = pow(0.5 + 0.5 * sin(u * 5.0 - uTime * 1.6), 18.0);
+    // network globe: requests travel along the arcs between cities
+    p = rotX(rotY(aGlobe.xyz, uTime * 0.12), 0.35);
+    float w = aGlobe.w;
+    if (w >= 0.0) {
+      glow = pulse(fract(w), 0.4, floor(w) * 0.37, 20.0);
+      c = mix(uGreen * 0.8, vec3(0.85, 1.0, 0.95), glow * 0.5);
+    } else if (w > -1.5) {
+      c = uAccent * 0.4; // graticule
+    } else {
+      c = uHot * 0.9; // cities
+      glow = 0.3 + 0.2 * sin(uTime * 3.0 + aGlobe.x * 10.0);
+    }
   }
 }
 
@@ -146,7 +164,7 @@ void main() {
     flung = uBurstOrigin + rotY(flung, (1.0 - settle) * 3.0);
     p = mix(flung, p, settle);
     burst = 1.0 - settle;
-    col = mix(col, mix(vec3(1.0), uHot, aMeta.x), burst * 0.6);
+    col = mix(col, mix(vec3(0.9), uHot, aMeta.x), burst * 0.3);
   }
 
   vec4 world = modelMatrix * vec4(p, 1.0);
@@ -157,11 +175,12 @@ void main() {
   gl_Position = projectionMatrix * mv;
   computeStreak(gl_Position);
 
-  float size = (0.05 + aMeta.x * 0.07) * (1.0 + glow * 1.6 + shock * 2.5 + push * 0.8 + burst * 0.8);
+  // small, crisp points; highlights come from density and pulses, not size
+  float size = (0.036 + aMeta.x * 0.045) * (1.0 + glow * 1.1 + shock * 2.0 + push * 0.6 + burst * 0.4);
   gl_PointSize = size * vStretch * uScale / -mv.z;
 
-  vColor = col + (glow * 0.6 + shock * 0.8 + push * 0.3) * 0.5;
-  vAlpha = (0.3 + 0.7 * smoothstep(-2.5, 1.5, world.z)) * (1.0 + glow);
+  vColor = col * 0.85 + (glow * 0.35 + shock * 0.5 + push * 0.2) * 0.5;
+  vAlpha = (0.22 + 0.5 * smoothstep(-2.5, 1.5, world.z)) * (1.0 + glow * 0.9);
 }
 `;
 
@@ -178,88 +197,6 @@ void main() {
 }
 `;
 
-// ── synapses: thin wires with pulses firing along them ───────────────────
-
-const synapseVertex = /* glsl */ `
-uniform float uTime;
-attribute vec2 aEdge; // x: 0 at one end, 1 at the other; y: phase
-varying float vT;
-varying float vPhase;
-varying float vShock;
-
-${NOISE}
-${HELPERS}
-${CORE}
-${WORLD_FX}
-
-void main() {
-  float n;
-  vec4 world = modelMatrix * vec4(corePosition(position, n), 1.0);
-  float push;
-  float shock;
-  world.xyz = applyWorldFx(world.xyz, push, shock);
-  gl_Position = projectionMatrix * viewMatrix * world;
-  vT = aEdge.x;
-  vPhase = aEdge.y;
-  vShock = shock;
-}
-`;
-
-const synapseFragment = /* glsl */ `
-uniform float uTime;
-uniform float uAlpha;
-uniform vec3 uAccent;
-varying float vT;
-varying float vPhase;
-varying float vShock;
-
-void main() {
-  float cycle = uTime * 0.45 + vPhase;
-  // each cycle a random ~45% of the wires fire
-  float fires = step(0.55, fract(sin(floor(cycle) * 12.9898 + vPhase * 78.233) * 43758.5453));
-  float pulse = (1.0 - smoothstep(0.0, 0.14, abs(vT - fract(cycle)))) * fires;
-  vec3 col = mix(uAccent, vec3(1.0), pulse * 0.7);
-  gl_FragColor = vec4(col, (0.07 + pulse * 0.85 + vShock * 0.5) * uAlpha);
-}
-`;
-
-const neuronVertex = /* glsl */ `
-uniform float uTime;
-uniform float uScale;
-attribute float aRandom;
-varying float vTwinkle;
-
-${NOISE}
-${HELPERS}
-${CORE}
-${WORLD_FX}
-
-void main() {
-  float n;
-  vec4 world = modelMatrix * vec4(corePosition(position, n), 1.0);
-  float push;
-  float shock;
-  world.xyz = applyWorldFx(world.xyz, push, shock);
-  vec4 mv = viewMatrix * world;
-  gl_Position = projectionMatrix * mv;
-  vTwinkle = 0.55 + 0.45 * sin(uTime * (1.0 + aRandom * 2.0) + aRandom * 50.0);
-  gl_PointSize = (0.09 + aRandom * 0.05) * (1.0 + shock * 2.0) * uScale / -mv.z;
-}
-`;
-
-const neuronFragment = /* glsl */ `
-uniform float uAlpha;
-uniform vec3 uAccent;
-varying float vTwinkle;
-
-void main() {
-  float d = length(gl_PointCoord - 0.5);
-  float a = (1.0 - smoothstep(0.0, 0.5, d));
-  float core = (1.0 - smoothstep(0.0, 0.18, d));
-  gl_FragColor = vec4(mix(uAccent, vec3(1.0), core), (a * 0.6 + core) * vTwinkle * uAlpha);
-}
-`;
-
 // ── component ────────────────────────────────────────────────────────────
 
 const lerp = THREE.MathUtils.lerp;
@@ -267,40 +204,18 @@ const damp = THREE.MathUtils.damp;
 
 export function MorphEntity({
   count,
-  nodes,
   surfaceLines,
 }: {
   count: number;
-  nodes: number;
   surfaceLines: number;
 }) {
   const group = useRef<THREE.Group>(null);
-  const extras = useRef<THREE.Group>(null);
-  const cage = useRef<THREE.LineSegments>(null);
-  const satA = useRef<THREE.Mesh>(null);
-  const satB = useRef<THREE.Mesh>(null);
   const wide = useThree((s) => s.size.width >= 768);
 
   const geometry = useMemo(
     () => buildEntityGeometry(count, surfaceLines),
     [count, surfaceLines],
   );
-  const synapses = useMemo(() => buildSynapses(nodes), [nodes]);
-  const cageGeometry = useMemo(
-    () => new THREE.EdgesGeometry(new THREE.IcosahedronGeometry(0.62, 1)),
-    [],
-  );
-  const rings = useMemo(
-    () =>
-      [1.55, 1.85].map((r) =>
-        new THREE.BufferGeometry().setFromPoints(
-          new THREE.EllipseCurve(0, 0, r, r, 0, Math.PI * 2).getPoints(128),
-        ),
-      ),
-    [],
-  );
-  const satGeometry = useMemo(() => new THREE.SphereGeometry(0.03, 12, 12), []);
-
   const uniforms = useMemo(
     () => ({
       ...shared,
@@ -314,83 +229,20 @@ export function MorphEntity({
     }),
     [],
   );
-  const synapseUniforms = useMemo(
-    () => ({ ...shared, uAlpha: { value: 0 } }),
-    [],
-  );
-  const entityMat = useMemo(
+  const material = useMemo(
     () => additiveShader(entityVertex, entityFragment, uniforms),
     [uniforms],
-  );
-  const synapseMat = useMemo(
-    () => additiveShader(synapseVertex, synapseFragment, synapseUniforms),
-    [synapseUniforms],
-  );
-  const neuronMat = useMemo(
-    () => additiveShader(neuronVertex, neuronFragment, synapseUniforms),
-    [synapseUniforms],
-  );
-
-  // core-only extras fade with the core's share of the morph
-  const cageMat = useMemo(
-    () =>
-      new THREE.LineBasicMaterial({
-        color: ACCENT,
-        transparent: true,
-        opacity: 0,
-      }),
-    [],
-  );
-  const ringMats = useMemo(
-    () =>
-      [ACCENT, GREEN].map(
-        (color) =>
-          new THREE.LineBasicMaterial({ color, transparent: true, opacity: 0 }),
-      ),
-    [],
-  );
-  const satMats = useMemo(
-    () =>
-      [ACCENT, GREEN].map(
-        (color) =>
-          new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0 }),
-      ),
-    [],
   );
 
   useEffect(
     () => () => {
       geometry.dispose();
-      synapses.lines.dispose();
-      synapses.neurons.dispose();
-      cageGeometry.dispose();
-      rings.forEach((r) => r.dispose());
-      satGeometry.dispose();
-      [
-        entityMat,
-        synapseMat,
-        neuronMat,
-        cageMat,
-        ...ringMats,
-        ...satMats,
-      ].forEach((m) => m.dispose());
+      material.dispose();
     },
-    [
-      geometry,
-      synapses,
-      cageGeometry,
-      rings,
-      satGeometry,
-      entityMat,
-      synapseMat,
-      neuronMat,
-      cageMat,
-      ringMats,
-      satMats,
-    ],
+    [geometry, material],
   );
 
-  useFrame((state, delta) => {
+  useFrame((_, delta) => {
     const g = group.current;
     if (!g) return;
 
@@ -409,7 +261,6 @@ export function MorphEntity({
     const x = lerp(a.x, b.x, t);
     const y = lerp(a.y, b.y, t);
     const scale = lerp(a.scale, b.scale, t);
-    const opacity = lerp(a.opacity, b.opacity, t);
 
     // the entity rides along with the camera, so it stays put on screen while
     // the dust and wireframes scroll past it
@@ -417,61 +268,14 @@ export function MorphEntity({
     g.scale.setScalar(scale);
     g.rotation.x = damp(g.rotation.x, -input.y * 0.18, 2, delta);
     g.rotation.y = damp(g.rotation.y, input.x * 0.25, 2, delta);
-    uniforms.uOpacity.value = opacity;
+    uniforms.uOpacity.value = lerp(a.opacity, b.opacity, t);
     // the explosion starts at the screen centre, where the boot screen collapsed
     uniforms.uBurstOrigin.value.set(-x / scale, -y / scale, 0);
-
-    const coreWeight = from === 0 ? 1 - t : 0;
-    const w = coreWeight * smoothstep(0.55, 1, frame.intro);
-    synapseUniforms.uAlpha.value = w * opacity;
-    cageMat.opacity = 0.2 * w;
-    ringMats[0].opacity = 0.14 * w;
-    ringMats[1].opacity = 0.1 * w;
-    satMats[0].opacity = satMats[1].opacity = w;
-    if (extras.current) extras.current.visible = w > 0.005;
-
-    if (cage.current) {
-      cage.current.rotation.y -= delta * 0.25;
-      cage.current.rotation.z += delta * 0.12;
-    }
-    const time = state.clock.elapsedTime;
-    satA.current?.position.set(
-      Math.cos(time * 0.6) * 1.55,
-      Math.sin(time * 0.6) * 1.55,
-      0,
-    );
-    satB.current?.position.set(
-      Math.cos(-time * 0.4) * 1.85,
-      Math.sin(-time * 0.4) * 1.85,
-      0,
-    );
   });
 
   return (
     <group ref={group}>
-      <points geometry={geometry} material={entityMat} frustumCulled={false} />
-
-      <group ref={extras} visible={false}>
-        <lineSegments
-          geometry={synapses.lines}
-          material={synapseMat}
-          frustumCulled={false}
-        />
-        <points
-          geometry={synapses.neurons}
-          material={neuronMat}
-          frustumCulled={false}
-        />
-        <lineSegments ref={cage} geometry={cageGeometry} material={cageMat} />
-        <group rotation={[1.2, 0.2, 0]}>
-          <lineLoop geometry={rings[0]} material={ringMats[0]} />
-          <mesh ref={satA} geometry={satGeometry} material={satMats[0]} />
-        </group>
-        <group rotation={[1.9, -0.5, 0.3]}>
-          <lineLoop geometry={rings[1]} material={ringMats[1]} />
-          <mesh ref={satB} geometry={satGeometry} material={satMats[1]} />
-        </group>
-      </group>
+      <points geometry={geometry} material={material} frustumCulled={false} />
     </group>
   );
 }

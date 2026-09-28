@@ -121,10 +121,10 @@
 /* chromatic aberration on the WebGL layer when the intro detonates */
 @keyframes rgb-split {
   0% {
-    filter: drop-shadow(9px 0 0 oklch(0.72 0.21 28 / 0.75)) drop-shadow(-9px 0 0 oklch(0.80 0.15 220 / 0.75));
+    filter: drop-shadow(5px 0 0 oklch(0.72 0.21 28 / 0.45)) drop-shadow(-5px 0 0 oklch(0.80 0.15 220 / 0.45));
   }
   45% {
-    filter: drop-shadow(3px 0 0 oklch(0.72 0.21 28 / 0.45)) drop-shadow(-3px 0 0 oklch(0.80 0.15 220 / 0.45));
+    filter: drop-shadow(2px 0 0 oklch(0.72 0.21 28 / 0.25)) drop-shadow(-2px 0 0 oklch(0.80 0.15 220 / 0.25));
   }
   100% {
     filter: drop-shadow(0 0 0 transparent) drop-shadow(0 0 0 transparent);

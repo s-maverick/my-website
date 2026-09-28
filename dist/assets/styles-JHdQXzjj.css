@@ -4150,6 +4150,16 @@
     }
   }
 
+  @media (min-width: 80rem) {
+    .xl\:mr-\[22rem\] {
+      margin-right: 22rem;
+    }
+
+    .xl\:pr-\[23rem\] {
+      padding-right: 23rem;
+    }
+  }
+
   .dark\:border-destructive:is(.dark *) {
     border-color: var(--accent-hot);
   }
@@ -4576,11 +4586,11 @@
 
 @keyframes rgb-split {
   0% {
-    filter: drop-shadow(9px 0 oklch(72% .21 28 / .75)) drop-shadow(-9px 0 oklch(80% .15 220 / .75));
+    filter: drop-shadow(5px 0 oklch(72% .21 28 / .45)) drop-shadow(-5px 0 oklch(80% .15 220 / .45));
   }
 
   45% {
-    filter: drop-shadow(3px 0 oklch(72% .21 28 / .45)) drop-shadow(-3px 0 oklch(80% .15 220 / .45));
+    filter: drop-shadow(2px 0 oklch(72% .21 28 / .25)) drop-shadow(-2px 0 oklch(80% .15 220 / .25));
   }
 
   100% {
