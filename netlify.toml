@@ -1,0 +1,20 @@
+# Netlify reads this automatically once the GitHub repo is connected —
+# no build settings need to be typed into the Netlify UI.
+
+[build]
+  command = "npm run build"
+  # vite.config.ts builds src/ into ../dist
+  publish = "dist"
+
+[build.environment]
+  # Vite 8 needs Node 20.19+ or 22.12+
+  NODE_VERSION = "22"
+
+# Single-page-app fallback lives in public/_redirects (copied into dist/ by Vite).
+
+# Everything in /assets is content-hashed (e.g. index-CEMqkEt-.js), so browsers
+# can cache it forever; index.html itself is always revalidated.
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"

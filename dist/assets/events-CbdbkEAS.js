@@ -1,1 +1,0 @@
-var e=`scene:status`;export{e as t};
