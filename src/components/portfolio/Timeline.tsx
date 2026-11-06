@@ -5,11 +5,27 @@ import { SectionHeading } from "./SectionHeading";
 
 const work = [
   {
+    hash: "5c1a7e2",
+    branch: "HEAD → csaa",
+    title: "Applied AI Engineer",
+    where: "CSAA – AAA Insurer Company, Boston, MA",
+    date: "May 2025 — Present",
+    diff: [
+      "+ built a RAG chatbot (Python, LangChain, LLM APIs) answering from approved docs + internal knowledge",
+      "+ hybrid-search retrieval pipeline → +25% retrieval accuracy on a held-out eval set",
+      "+ migrated retrieval to Qdrant + refined chunking → 55% faster retrieval",
+      "+ request-based model selection → 40% faster responses, 45% lower API cost, no measurable quality loss",
+      "+ evaluation workflows: test sets, retrieval metrics & answer-quality checks to gate every release",
+      "+ integrated Model Context Protocol (MCP) tools for retrieval + external tool use",
+      "+ retrieval checks and API access controls to curb unsupported answers & protect sensitive data",
+    ],
+  },
+  {
     hash: "a3f9c21",
-    branch: "HEAD → UMass Amherst",
+    branch: "umass amherst",
     title: "Graduate Research & Teaching Assistant",
     where: "University of Massachusetts, Amherst, MA",
-    date: "Feb. 2025 — Present",
+    date: "Feb. 2025 — May 2026",
     diff: [
       "+ led teaching sessions on LLMs, stats & research design for 200+ students",
       "+ technical support in ML pipelines, quant methods, data science ethics",
@@ -19,55 +35,18 @@ const work = [
     ],
   },
   {
-    hash: "d4c8801",
-    branch: "cartell",
-    title: "Data Analyst · Deployment Team",
-    where: "Cartell, Shippensburg, PA",
-    date: "Jan. 2025 — Dec. 2025",
+    hash: "9e4d0b8",
+    branch: "phoenix tech hub",
+    title: "Forward Deployed Engineer",
+    where: "Phoenix Tech Hub, Pune, MH",
+    date: "Jan. 2023 — Aug. 2024",
     diff: [
-      "+ architected end-to-end AI orchestration pipeline in n8n (PostgreSQL, AWS, K8s)",
-      "+ engineered GPT-4o powered theft detection, anomaly flagging & risk assessment",
-      "+ integrated Twilio, SendGrid & Slack APIs for real-time alerting pipelines",
-      "+ built Python ingestion + quality validation pipelines for large-scale image dataset",
-      "+ surfaced labeling gaps via class distribution analysis → informed resampling strategy",
-    ],
-  },
-  {
-    hash: "7b2e110",
-    branch: "xresilient",
-    title: "Co-Founder",
-    where: "XResilient, A Venture by SXT IT Solution, Pune, MH",
-    date: "Nov. 2023 — Present",
-    diff: [
-      "+ co-founded B2B services firm; scaled to 10+ enterprise clients in 8 months",
-      "+ drove 150% revenue increase through AI-driven product lines",
-      "+ translated business requirements into analytical reports & dashboards",
-      "+ EDA + feature engineering on client datasets to surface trends & improve models",
-      "+ shipped full-stack hotel management platform (Flask APIs, MATLAB UI) for restaurant chain",
-    ],
-  },
-  {
-    hash: "f1a0293",
-    branch: "ybi foundation",
-    title: "Data Scientist",
-    where: "YBI Foundation, Pune, MH",
-    date: "July 2023 — Sep. 2023",
-    diff: [
-      "+ automated preprocessing pipelines → reduced anomalies by 20%",
-      "+ managed end-to-end model lifecycle for XGBoost & Random Forest architectures",
-      "+ hyperparameter tuning for production deployment; built KPI dashboards",
-    ],
-  },
-  {
-    hash: "c3b7742",
-    branch: "exposys data labs",
-    title: "Data Scientist",
-    where: "Exposys Data Labs, Pune, MH",
-    date: "April 2023 — June 2023",
-    diff: [
-      "+ analyzed 2B+ record dataset in Python/SQL for seasonal, pricing & inventory trends",
-      "+ built ARIMA + ensemble time-series models → 14% improvement in demand prediction",
-      "+ delivered Matplotlib visualizations as customer-facing stakeholder reports",
+      "+ turned client requirements into Python services + FastAPI REST endpoints, automating manual workflows",
+      "+ Python/SQL data-processing workflows consolidating multiple sources (target: 30% faster data prep)",
+      "+ LLM proof-of-concepts for enterprise document analysis + question answering",
+      "+ retrieval-based QA prototypes with embeddings, vector search & document context",
+      "+ reusable utility + config modules shared across 5+ service components",
+      "+ presented solution designs & trade-offs; scoped acceptance criteria and phased delivery plans",
     ],
   },
   {
@@ -243,7 +222,7 @@ function CommitList({ items, prompt }: { items: typeof work; prompt: string }) {
             <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1">
               <div className="flex items-center gap-3 text-accent">
                 <span className="text-foreground">{c.hash}</span>
-                <span className="rounded border border-accent/30 bg-accent/10 px-1.5 text-[10px] uppercase tracking-wider text-accent">
+                <span className="rounded border border-accent/30 bg-accent/10 px-1.5 text-[11px] uppercase tracking-wider text-accent">
                   {c.branch}
                 </span>
               </div>
@@ -262,8 +241,10 @@ function CommitList({ items, prompt }: { items: typeof work; prompt: string }) {
             {/* <ul className="mt-1 space-y-1 text-xs opacity-0 transition-opacity group-hover:opacity-100 md:opacity-70"> */}
             <ul className="mt-1 space-y-1 text-xs opacity-100 transition-opacity md:opacity-100 md:group-hover:opacity-100">
               {c.diff.map((d) => (
-                <li key={d} className="text-accent/90">
-                  {d}
+                // `git diff` style: green "+" gutter, readable near-white text
+                <li key={d} className="flex gap-2 leading-relaxed text-foreground/80">
+                  <span aria-hidden className="shrink-0 text-accent-2">+</span>
+                  <span>{d.replace(/^\+\s*/, "")}</span>
                 </li>
               ))}
             </ul>

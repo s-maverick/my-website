@@ -129,14 +129,20 @@ const LINKS: Link[] = [
 ].map(([source, target]) => ({ source, target }));
 
 
+// the svg draws in a fixed 500×500 viewBox; nodes stay inside these walls so
+// they never cover the title (top) or spill their labels off the edges
+const VIEW = 500;
+const BOUNDS = { left: 34, right: VIEW - 34, top: 58, bottom: VIEW - 30 };
+const clampX = (d: Node, x: number) => Math.max(BOUNDS.left + d.r, Math.min(BOUNDS.right - d.r, x));
+const clampY = (d: Node, y: number) => Math.max(BOUNDS.top + d.r, Math.min(BOUNDS.bottom - d.r, y));
+
 export function SkillGraph() {
   const ref = useRef<SVGSVGElement>(null);
 
   useEffect(() => {
-    const svg = d3.select(ref.current);
-    if (!ref.current) return;
-    const width = ref.current.clientWidth;
-    const height = ref.current.clientHeight;
+    const el = ref.current;
+    if (!el) return;
+    const svg = d3.select(el);
 
     svg.selectAll("*").remove();
 
@@ -153,7 +159,7 @@ export function SkillGraph() {
           .strength(0.6),
       )
       .force("charge", d3.forceManyBody().strength(-220))
-      .force("center", d3.forceCenter(width / 2, height / 2))
+      .force("center", d3.forceCenter(VIEW / 2, (BOUNDS.top + BOUNDS.bottom) / 2))
       .force(
         "collide",
         d3.forceCollide<Node>().radius((d) => d.r + 6),
@@ -183,8 +189,8 @@ export function SkillGraph() {
             d.fy = d.y;
           })
           .on("drag", (event, d) => {
-            d.fx = event.x;
-            d.fy = event.y;
+            d.fx = clampX(d, event.x);
+            d.fy = clampY(d, event.y);
           })
           .on("end", (event, d) => {
             if (!event.active) sim.alphaTarget(0);
@@ -223,9 +229,10 @@ export function SkillGraph() {
 
     // pointer repulsion
     const handlePointer = (event: PointerEvent) => {
-      const rect = ref.current!.getBoundingClientRect();
-      const mx = event.clientX - rect.left;
-      const my = event.clientY - rect.top;
+      // screen px → viewBox units, so nodes dodge the actual cursor
+      const rect = el.getBoundingClientRect();
+      const mx = ((event.clientX - rect.left) * VIEW) / rect.width;
+      const my = ((event.clientY - rect.top) * VIEW) / rect.height;
       sim.force(
         "pointer",
         d3
@@ -243,10 +250,14 @@ export function SkillGraph() {
       sim.force("pointer", null);
       sim.alphaTarget(0);
     };
-    ref.current.addEventListener("pointermove", handlePointer);
-    ref.current.addEventListener("pointerleave", handleLeave);
+    el.addEventListener("pointermove", handlePointer);
+    el.addEventListener("pointerleave", handleLeave);
 
     sim.on("tick", () => {
+      for (const d of sim.nodes()) {
+        d.x = clampX(d, d.x ?? VIEW / 2);
+        d.y = clampY(d, d.y ?? VIEW / 2);
+      }
       link
         .attr("x1", (d) => (d.source as Node).x!)
         .attr("y1", (d) => (d.source as Node).y!)
@@ -257,17 +268,17 @@ export function SkillGraph() {
 
     return () => {
       sim.stop();
-      ref.current?.removeEventListener("pointermove", handlePointer);
-      ref.current?.removeEventListener("pointerleave", handleLeave);
+      el.removeEventListener("pointermove", handlePointer);
+      el.removeEventListener("pointerleave", handleLeave);
     };
   }, []);
 
   return (
     <div className="relative aspect-square w-full overflow-hidden rounded-xl border border-border bg-surface/40">
-      <div className="absolute left-3 top-3 z-10 font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
+      <div className="absolute left-3 top-3 z-10 font-mono text-[11px] uppercase tracking-wider text-muted-foreground">
         <span className="text-accent">●</span> skill_graph.json · drag nodes
       </div>
-      <svg ref={ref} className="h-full w-full" viewBox="0 0 500 500" preserveAspectRatio="xMidYMid meet" />
+      <svg ref={ref} className="h-full w-full" viewBox={`0 0 ${VIEW} ${VIEW}`} preserveAspectRatio="xMidYMid meet" />
     </div>
   );
 }

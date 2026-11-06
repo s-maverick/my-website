@@ -152,8 +152,6 @@ import {
 } from "@tanstack/react-router";
 import { useEffect } from "react";
 
-import appCss from "../styles.css?url";
-import faviconUrl from "../assets/favicon.png?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 
 function NotFoundComponent() {
@@ -219,37 +217,24 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "sangam patil — data scientist & ai builder" },
+      { title: "Sangam Patil" },
       {
         name: "description",
         content:
-          "data scientist + ai/ml builder shipping rag pipelines, llm orchestration, and data-driven products. umass amherst. cofounder, xresilient.",
+          "applied ai engineer + forward deployed engineer. rag systems, llm evaluation and mcp tooling at csaa. ms data science, umass amherst.",
       },
       { name: "author", content: "Sangam Patil" },
-      { property: "og:title", content: "sangam patil — data scientist & ai builder" },
+      { property: "og:title", content: "sangam patil — applied ai engineer" },
       {
         property: "og:description",
         content:
-          "data scientist + ai/ml builder shipping rag pipelines, llm orchestration, and data-driven products.",
+          "applied ai engineer shipping rag systems, llm evaluation and mcp tooling.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
-    links: [
-      { rel: "stylesheet", href: appCss },
-      { rel: "icon", type: "image/png", href: faviconUrl },
-      { rel: "apple-touch-icon", href: faviconUrl },
-      { rel: "preconnect", href: "https://fonts.googleapis.com" },
-      {
-        rel: "preconnect",
-        href: "https://fonts.gstatic.com",
-        crossOrigin: "anonymous",
-      },
-      {
-        rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500;600&family=Inter+Tight:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap",
-      },
-    ],
+    // stylesheet, fonts and favicon are linked in src/index.html so they load
+    // with the HTML instead of after the JS bundle
   }),
   component: RootComponent,
   notFoundComponent: NotFoundComponent,

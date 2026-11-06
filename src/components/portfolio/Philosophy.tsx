@@ -6,19 +6,19 @@ const principles = [
     n: "01",
     title: "Models don't Matter, Decisions Do.",
     body: "the moment a stakeholder changes their mind because of something I built, the work is real. before that, it's a notebook.",
-    proof: "Xresilient · drove 150% revenue lift across 10+ b2b clients with dashboards & KPIs",
+    proof: "CSAA · request-based model selection cut response time 40% and API cost 45% with no measurable quality loss",
   },
   {
     n: "02",
     title: "Ship Ugly, Iterate Loud.",
-    body: "v0 by friday beats v1 by quarter-end. every n8n flow at cartell was built this way. so was the rest.",
-    proof: "Cartell · AI orchestration flows live in production within sprint cycles",
+    body: "v0 by friday beats v1 by quarter-end. every client PoC at phoenix tech hub was built this way. so was the rest.",
+    proof: "Phoenix Tech Hub · LLM proofs-of-concept turned into FastAPI services with phased delivery plans",
   },
   {
     n: "03",
     title: "The Dataset is the Moat.",
     body: "anyone can prompt an LLM. fewer people can clean, label, and structure the thing it learns from. that's the lane.",
-    proof: "UMass Amherst · research work with LLMs at the intersection of AI and data science",
+    proof: "CSAA · a held-out eval set drove +25% retrieval accuracy · UMass Amherst · research with LLMs",
   },
 ];
 
@@ -55,7 +55,7 @@ export function Philosophy() {
             <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
               {p.body}
             </p>
-            <div className="mt-6 border-t border-border pt-4 font-mono text-[11px] text-muted-foreground">
+            <div className="mt-6 border-t border-border pt-4 font-mono text-xs leading-relaxed text-muted-foreground">
               <span className="text-accent">$ proof</span> — {p.proof}
             </div>
           </TiltCard>

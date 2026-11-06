@@ -9,7 +9,7 @@ const ROLES = [
   "AI Engineer",
   "AI Enthusiast",
   "Forward Deployment Engineer",
-  "Founder",
+  "Applied AI Engineer",
   "Trader",
   "Developer", 
   "Freelancer",

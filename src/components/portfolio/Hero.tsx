@@ -6,7 +6,8 @@ import { CodeRain } from "./CodeRain";
 import { TiltCard } from "./TiltCard";
 import { Magnetic } from "./Magnetic";
 import { CountUp } from "./CountUp";
-import sangamPhoto from "@/assets/sangam.png";
+// 937×1250 JPEG (~200 KB), downscaled from the 3024×4032 original sangam.png
+import sangamPhoto from "@/assets/sangam.jpg";
 
 const headline = "I build things that actually ship.";
 
@@ -89,12 +90,11 @@ export function Hero() {
           transition={{ delay: 0.7, duration: 0.6 }}
           className="mt-6 max-w-2xl text-base leading-relaxed text-muted-foreground sm:text-lg"
         >
-          Data Scientist by Training, Shipper by Habit. <br/>
+          Applied AI Engineer by Title, Shipper by Habit. <br/>
           Currently at{" "}
-          <span className="text-foreground">UMass Amherst</span> turning messy
-          data into decisions and occasionally into revenue (
-          <span className="text-foreground">Xresilient</span> did a 150% lift,
-          not bad huh?).
+          <span className="text-foreground">CSAA</span> building RAG systems
+          that answer from the right documents, fast and cheap (55% faster
+          retrieval, 45% lower LLM cost, not bad huh?).
         </motion.p>
         <motion.p
           initial={{ opacity: 0 }}
@@ -103,8 +103,9 @@ export function Hero() {
           className="mt-4 max-w-2xl text-base leading-relaxed text-muted-foreground sm:text-lg"
         >
           Right now I&apos;m deep in{" "}
-          <span className="text-accent">Agentic Workflows </span>,{" "}
-          <span className="text-accent">LLM Orchestration</span>, and the kind of
+          <span className="text-accent">Agentic Workflows</span>,{" "}
+          <span className="text-accent">MCP Tooling</span>,{" "}
+          <span className="text-accent">LLM Evaluation</span>, and the kind of
           vibe-coded prototypes that go from idea to deploy before the coffee
           gets cold.
         </motion.p>
@@ -150,9 +151,9 @@ export function Hero() {
         >
           {[
             // { k: "gpa", v: "3.9" },
-            { k: "budget managed", v: "$5 Million" },
-            { k: "revenue lift", v: "150%" },
-            { k: "clients shipped", v: "10+" },
+            { k: "years shipping ai", v: "3+" },
+            { k: "faster retrieval", v: "55%" },
+            { k: "lower llm cost", v: "45%" },
           ].map((s) => (
             <TiltCard
               key={s.k}
@@ -162,7 +163,7 @@ export function Hero() {
               <div className="text-xl text-accent">
                 <CountUp value={s.v} />
               </div>
-              <div className="mt-1 text-[10px] uppercase tracking-wider text-muted-foreground">
+              <div className="mt-1 text-[11px] uppercase tracking-wider text-muted-foreground">
                 {s.k}
               </div>
             </TiltCard>
@@ -184,11 +185,13 @@ export function Hero() {
             <img
               src={sangamPhoto}
               alt="Sangam Patil"
-              loading="lazy"
+              // above the fold: fetch it right away, not lazily
+              loading="eager"
+              fetchPriority="high"
               className="aspect-[4/5] w-full object-cover transition-transform duration-700 group-hover:scale-[1.03]"
             />
             <div className="pointer-events-none absolute inset-0 z-[2] bg-gradient-to-t from-background/80 via-background/0 to-transparent" />
-            <div className="absolute bottom-3 left-3 right-3 z-[3] flex items-center justify-between font-mono text-[10px] text-muted-foreground">
+            <div className="absolute bottom-3 left-3 right-3 z-[3] flex items-center justify-between font-mono text-[11px] text-muted-foreground">
               <span className="text-accent">● online</span>
               <span>~/sangam.jpg</span>
             </div>

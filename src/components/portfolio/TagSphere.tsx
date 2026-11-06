@@ -167,11 +167,13 @@ export function TagSphere({
           }}
           className={cn(
             "absolute left-1/2 top-1/2 whitespace-nowrap rounded-md px-1.5 py-0.5 font-mono text-[11px] transition-colors duration-300 will-change-transform sm:text-xs",
+            // dark backing pills: where tags overlap, the front one (higher
+            // z-index) covers the back one instead of the letters mixing
             activeGroup === null
-              ? "text-foreground"
+              ? "bg-background/85 text-foreground"
               : activeGroup === t.group
-                ? "border border-accent/50 bg-accent/15 text-accent shadow-[0_0_14px_oklch(0.80_0.15_220/0.45)]"
-                : "text-muted-foreground/50",
+                ? "border border-accent/50 bg-[oklch(0.24_0.05_220)] text-accent shadow-[0_0_14px_oklch(0.80_0.15_220/0.45)]"
+                : "bg-background/70 text-muted-foreground/50",
           )}
         >
           {t.label}

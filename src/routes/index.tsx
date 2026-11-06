@@ -21,13 +21,13 @@ export const Route = createFileRoute("/")({
       {
         name: "description",
         content:
-          "data scientist + ai/ml builder. ms data science @ umass amherst. cofounder, xresilient. shipping rag pipelines and llm orchestration.",
+          "applied ai engineer + forward deployed engineer. rag systems, llm evaluation and mcp tooling at csaa. ms data science, umass amherst.",
       },
-      { property: "og:title", content: "sangam patil — data scientist & ai builder" },
+      { property: "og:title", content: "sangam patil — applied ai engineer" },
       {
         property: "og:description",
         content:
-          "ships ai things that get used. rag pipelines, llm orchestration, data-driven products.",
+          "ships ai things that get used. rag systems, llm evaluation, mcp tooling.",
       },
     ],
   }),

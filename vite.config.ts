@@ -51,7 +51,8 @@ export default defineConfig({
   plugins: [
     TanStackRouterVite({
       target: 'react',
-      autoCodeSplitting: true,
+      // one-page site: splitting the route only adds a second download before anything shows
+      autoCodeSplitting: false,
       routesDirectory: path.resolve(__dirname, 'src/routes'),
       generatedRouteTree: path.resolve(__dirname, 'src/routeTree.gen.ts'),
     }),

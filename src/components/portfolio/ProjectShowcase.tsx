@@ -9,6 +9,21 @@ import { CountUp } from "./CountUp";
 const projects = [
   // ── LLM / AI ──────────────────────────────────────────────────
   {
+    slug: "resume-rag",
+    title: "Resume RAG",
+    tag: "llm · rag · agents",
+    blurb:
+      "Evidence-grounded job-matching agent: it only claims a skill when it can cite proof from the resume. Resumes are embedded with Gemini and indexed in Supabase pgvector (HNSW cosine search) behind a FastAPI service.",
+    stack: ["FastAPI", "Supabase", "pgvector (HNSW)", "Gemini embeddings", "Python"],
+    link: "https://github.com/s-maverick/resume-rag",
+    linkLabel: "GitHub",
+    metrics: [
+      { k: "fewer false positives", v: "up to 85%" },
+      { k: "vector search", v: "HNSW cosine" },
+      { k: "every skill claim", v: "cited" },
+    ],
+  },
+  {
     slug: "domain-alpaca",
     title: "Domain-Alpaca",
     tag: "llm · fine-tuning",
@@ -356,7 +371,7 @@ function ProjectLinkBadge({ link, linkLabel }: { link: string; linkLabel: string
         inline-flex shrink-0 items-center gap-1.5
         rounded-full border border-white/10 bg-white/5
         px-2.5 py-1
-        font-mono text-[10px] font-medium text-muted-foreground
+        font-mono text-[11px] font-medium text-muted-foreground
         transition-colors duration-150
         hover:border-accent/40 hover:bg-accent/10 hover:text-accent
       "
@@ -492,7 +507,7 @@ export function ProjectShowcase() {
                 <h3 className="font-display text-2xl text-foreground">
                   {p.title}
                 </h3>
-                <span className="shrink-0 font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
+                <span className="shrink-0 font-mono text-[11px] uppercase tracking-wider text-muted-foreground">
                   {p.tag}
                 </span>
               </div>
@@ -505,7 +520,7 @@ export function ProjectShowcase() {
                   <span
                     key={s}
                     style={{ transitionDelay: `${si * 30}ms` }}
-                    className="rounded-md border border-border bg-background px-2 py-0.5 font-mono text-[10px] text-muted-foreground transition-[color,border-color,transform] group-hover:-translate-y-0.5 group-hover:border-accent/30 group-hover:text-accent"
+                    className="rounded-md border border-border bg-background px-2 py-0.5 font-mono text-[11px] text-muted-foreground transition-[color,border-color,transform] group-hover:-translate-y-0.5 group-hover:border-accent/30 group-hover:text-accent"
                   >
                     {s}
                   </span>
@@ -518,7 +533,7 @@ export function ProjectShowcase() {
                     <div className="text-lg text-foreground">
                       <CountUp value={m.v} />
                     </div>
-                    <div className="mt-0.5 text-[10px] uppercase tracking-wider text-muted-foreground">
+                    <div className="mt-0.5 text-[11px] uppercase tracking-wider text-muted-foreground">
                       {m.k}
                     </div>
                   </div>
@@ -557,7 +572,7 @@ export function ProjectShowcase() {
               )}
             </button>
           </Magnetic>
-          <span className="text-[10px] uppercase tracking-wider text-muted-foreground">
+          <span className="text-[11px] uppercase tracking-wider text-muted-foreground">
             showing {visible.length} of {shown.length}
           </span>
         </div>

@@ -16,3 +16,6 @@ dist/
 
 # macOS
 .DS_Store
+
+# personal documents (contain contact details)
+CV-*.pdf

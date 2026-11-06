@@ -3,12 +3,39 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>sangam patil — data scientist & ai builder</title>
-    <meta name="description" content="data scientist + ai/ml builder shipping rag pipelines, llm orchestration, and data-driven products. umass amherst. cofounder, xresilient." />
+    <title>Sangam Patil</title>
+    <meta name="description" content="applied ai engineer + forward deployed engineer. rag systems, llm evaluation and mcp tooling at csaa. ms data science, umass amherst." />
+    <meta name="theme-color" content="#090e12" />
     <link rel="icon" type="image/png" href="/assets/favicon.png" />
+    <link rel="apple-touch-icon" href="/assets/favicon.png" />
+
+    <!-- styles + fonts load with the HTML, not after the JS, so there's no unstyled first paint -->
+    <link rel="stylesheet" href="/styles.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500;600&family=Inter+Tight:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+    />
+
+    <!-- painted before any file arrives: dark from the very first frame -->
+    <style>
+      html, body { background: #090e12; color: #eef1f5; margin: 0; }
+      #boot-shell {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font: 13px/1.6 "JetBrains Mono", ui-monospace, monospace;
+        color: #00d3ff;
+      }
+    </style>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <!-- replaced by React as soon as the app starts -->
+      <div id="boot-shell">&gt; booting sangam.os…</div>
+    </div>
     <script type="module" src="/client.tsx"></script>
   </body>
 </html>

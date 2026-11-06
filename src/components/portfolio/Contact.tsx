@@ -260,7 +260,7 @@ export function Contact() {
                     autoComplete="off"
                     data-1p-ignore // Ignores 1Password
                     data-lpignore="true" // Ignores LastPass
-                    className="w-full bg-transparent text-foreground placeholder:text-muted-foreground/60 focus:outline-none"
+                    className="w-full bg-transparent text-foreground placeholder:text-muted-foreground/80 focus:outline-none"
                   />
                 </div>
               </div>
@@ -281,7 +281,7 @@ export function Contact() {
                     autoComplete="off"
                     data-1p-ignore
                     data-lpignore="true"
-                    className="w-full bg-transparent text-foreground placeholder:text-muted-foreground/60 focus:outline-none"
+                    className="w-full bg-transparent text-foreground placeholder:text-muted-foreground/80 focus:outline-none"
                   />
                 </div>
               </div>
@@ -300,7 +300,7 @@ export function Contact() {
                     rows={4}
                     required
                     data-gramm="false" // Prevents Grammarly injection loops
-                    className="w-full resize-none bg-transparent text-foreground placeholder:text-muted-foreground/60 focus:outline-none"
+                    className="w-full resize-none bg-transparent text-foreground placeholder:text-muted-foreground/80 focus:outline-none"
                   />
                 </div>
               </div>

@@ -67,7 +67,7 @@ export function Stack() {
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:items-start">
         <div className="relative overflow-hidden rounded-xl border border-border bg-surface/40 backdrop-blur-sm lg:sticky lg:top-24">
-          <div className="flex items-center justify-between border-b border-border bg-surface px-4 py-2 font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
+          <div className="flex items-center justify-between border-b border-border bg-surface px-4 py-2 font-mono text-[11px] uppercase tracking-wider text-muted-foreground">
             <span>
               <span className="text-accent">●</span> skill_sphere.gl
             </span>
@@ -99,7 +99,7 @@ export function Stack() {
                 active === i ? "border-accent" : "border-border"
               }`}
             >
-              <div className="font-mono text-[11px] uppercase tracking-wider text-muted-foreground">
+              <div className="font-mono text-xs uppercase tracking-wider text-muted-foreground">
                 {g.label}/
               </div>
               <div className="mt-4 flex flex-wrap gap-1.5">
