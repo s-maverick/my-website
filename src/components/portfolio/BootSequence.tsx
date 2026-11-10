@@ -1,17 +1,21 @@
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 
+// typed on a timer…
 const LINES = [
   "> booting sangam.os v2.6",
   "[ ok ] mounting /experience /education /projects",
-  "[ ok ] compiling shaders: mlp · soc · git_graph",
   "[ ok ] indexing shipped projects",
   "[ ok ] calibrating vibes",
-  "> ready.",
 ];
+// …while this one is real: it stays pending until the 3D layer has drawn a frame
+const WORK = "compiling shaders: mlp · soc · git_graph";
+const READY = "> ready.";
 
 const STEP_MS = 150;
 const HOLD_MS = 280;
+// never hold the page hostage if the 3D layer is slow or can't start
+const MAX_WAIT_MS = 6000;
 const STORAGE_KEY = "sangam.booted";
 
 /** Show the intro once per browser session, and never to reduced-motion users. */
@@ -27,11 +31,20 @@ export function shouldShowBoot() {
 }
 
 /**
- * Terminal boot overlay that types a few lines, then collapses like a CRT
- * powering on. Click / any key skips it. Locks scroll while visible.
+ * Terminal boot overlay. It doubles as the real loading screen: the page
+ * underneath (including the WebGL scene) sets itself up while this covers it,
+ * and the last step only completes once `ready` says that work is finished.
+ * Then it collapses like a CRT. Click / any key skips it. Locks scroll while visible.
  */
-export function BootSequence({ onDone }: { onDone: () => void }) {
-  const [shown, setShown] = useState(0);
+export function BootSequence({
+  ready,
+  onDone,
+}: {
+  ready: boolean;
+  onDone: () => void;
+}) {
+  const [typed, setTyped] = useState(0);
+  const [timedOut, setTimedOut] = useState(false);
   const [open, setOpen] = useState(true);
 
   useEffect(() => {
@@ -44,12 +57,11 @@ export function BootSequence({ onDone }: { onDone: () => void }) {
     const prevOverflow = html.style.overflow;
     html.style.overflow = "hidden";
 
-    const timers = LINES.map((_, i) =>
-      window.setTimeout(() => setShown(i + 1), i * STEP_MS),
+    // +1: the pending "compiling shaders" line appears after the scripted ones
+    const timers = Array.from({ length: LINES.length + 1 }, (_, i) =>
+      window.setTimeout(() => setTyped(i + 1), i * STEP_MS),
     );
-    timers.push(
-      window.setTimeout(() => setOpen(false), LINES.length * STEP_MS + HOLD_MS),
-    );
+    timers.push(window.setTimeout(() => setTimedOut(true), MAX_WAIT_MS));
 
     const skip = () => setOpen(false);
     window.addEventListener("keydown", skip);
@@ -63,7 +75,19 @@ export function BootSequence({ onDone }: { onDone: () => void }) {
     };
   }, []);
 
-  const progress = Math.round((shown / LINES.length) * 100);
+  const workShown = typed > LINES.length;
+  const done = workShown && (ready || timedOut);
+
+  useEffect(() => {
+    if (!done) return;
+    const id = window.setTimeout(() => setOpen(false), HOLD_MS);
+    return () => clearTimeout(id);
+  }, [done]);
+
+  const steps = LINES.length + 2;
+  const progress = Math.round(
+    ((Math.min(typed, LINES.length + 1) + (done ? 1 : 0)) / steps) * 100,
+  );
 
   return (
     <AnimatePresence onExitComplete={onDone}>
@@ -82,7 +106,7 @@ export function BootSequence({ onDone }: { onDone: () => void }) {
           }}
         >
           <div className="w-full max-w-lg font-mono text-xs sm:text-sm">
-            {LINES.slice(0, shown).map((l, i) => (
+            {LINES.slice(0, typed).map((l) => (
               <motion.div
                 key={l}
                 initial={{ opacity: 0, x: -6 }}
@@ -91,9 +115,7 @@ export function BootSequence({ onDone }: { onDone: () => void }) {
                 className={
                   l.startsWith("[ ok ]")
                     ? "text-muted-foreground"
-                    : i === LINES.length - 1
-                      ? "text-accent"
-                      : "text-foreground"
+                    : "text-foreground"
                 }
               >
                 {l.startsWith("[ ok ]") ? (
@@ -106,6 +128,32 @@ export function BootSequence({ onDone }: { onDone: () => void }) {
                 )}
               </motion.div>
             ))}
+            {workShown && (
+              <motion.div
+                initial={{ opacity: 0, x: -6 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.15 }}
+                className="text-muted-foreground"
+              >
+                {done ? (
+                  <span className="text-accent">[ ok ]</span>
+                ) : (
+                  // CSS animation: keeps pulsing even while the main thread is busy
+                  <span className="animate-pulse text-accent-2">[ .. ]</span>
+                )}{" "}
+                {WORK}
+              </motion.div>
+            )}
+            {done && (
+              <motion.div
+                initial={{ opacity: 0, x: -6 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.15 }}
+                className="text-accent"
+              >
+                {READY}
+              </motion.div>
+            )}
             <div className="mt-5 h-px w-full overflow-hidden bg-border">
               <motion.div
                 className="h-full bg-gradient-to-r from-accent to-accent-2"

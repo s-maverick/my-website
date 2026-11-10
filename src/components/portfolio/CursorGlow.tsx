@@ -25,9 +25,22 @@ export function CursorGlow() {
     let ry = ty;
     let raf = 0;
 
+    // Until the pointer first moves we don't know where it is: keep the layers
+    // hidden rather than parking a dot in the corner and a ring mid-screen.
+    const layers = [glow.current, ring.current, dot.current];
+    let seen = false;
+    layers.forEach((el) => el && (el.style.visibility = "hidden"));
+
     const onMove = (e: PointerEvent) => {
       tx = e.clientX;
       ty = e.clientY;
+      if (!seen) {
+        seen = true;
+        // start at the pointer instead of gliding in from the centre
+        gx = rx = tx;
+        gy = ry = ty;
+        layers.forEach((el) => el && (el.style.visibility = "visible"));
+      }
       if (dot.current) {
         dot.current.style.transform = `translate3d(${tx}px, ${ty}px, 0) translate(-50%, -50%)`;
       }

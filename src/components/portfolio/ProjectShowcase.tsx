@@ -153,55 +153,6 @@ const projects = [
     ],
   },
 
-  // ── COMPUTER VISION ───────────────────────────────────────────
-  {
-    slug: "wildfire-smoke-rcnn",
-    title: "Wildfire Smoke Detection · Faster R-CNN",
-    tag: "computer vision · published",
-    blurb:
-      "Real-time wildfire smoke detection via Faster R-CNN trained on ISRO Bhuvan-NRSC and IMD satellite datasets. Published in Springer.",
-    stack: ["PyTorch", "Faster R-CNN", "GIS / satellite imagery"],
-    link: "https://link.springer.com/chapter/10.1007/978-981-99-8398-8_10",
-    linkLabel: "Springer",
-    metrics: [
-      { k: "architecture", v: "Faster R-CNN" },
-      { k: "datasets", v: "ISRO + IMD" },
-      { k: "published", v: "Springer" },
-    ],
-  },
-  {
-    slug: "face-emotion-opencv",
-    title: "Face Emotion Detection · OpenCV",
-    tag: "computer vision · published",
-    blurb:
-      "Real-time computer vision pipeline using OpenCV to detect and classify 6+ facial emotions from live video feeds. Evaluated across diverse datasets to minimize bias.",
-    stack: ["OpenCV", "Python", "ETL pipeline", "deep learning"],
-    link: "https://link.springer.com/chapter/10.1007/978-981-95-0148-9_18",
-    linkLabel: "Springer",
-    metrics: [
-      { k: "emotions", v: "6+" },
-      { k: "mode", v: "real-time" },
-      { k: "published", v: "Springer" },
-    ],
-  },
-
-  // ── NLP / SECURITY ────────────────────────────────────────────
-  {
-    slug: "smart-contract-nlp",
-    title: "Smart Contract Vulnerability Detection",
-    tag: "nlp · blockchain · published",
-    blurb:
-      "NLP + deep learning models that parse smart contract source code to proactively identify high-risk security vulnerabilities through semantic analysis. Published in IEEE.",
-    stack: ["NLP", "deep learning", "embeddings", "tokenization", "Solidity"],
-    link: "https://ieeexplore.ieee.org/abstract/document/10420108",
-    linkLabel: "IEEE",
-    metrics: [
-      { k: "approach", v: "semantic analysis" },
-      { k: "target", v: "smart contracts" },
-      { k: "published", v: "IEEE" },
-    ],
-  },
-
   // ── GEOSPATIAL / DATA ENGINEERING ────────────────────────────
   {
     slug: "bufferzone-gis",
@@ -246,53 +197,7 @@ const projects = [
       { k: "frontend", v: "async React" },
     ],
   },
-  {
-    slug: "crypto-trace",
-    title: "Crypto-Trace",
-    tag: "blockchain · analytics",
-    blurb:
-      "Tracks cryptocurrency transactions with blockchain technology. Combines data analytics and machine learning to surface patterns and anomalies across on-chain transaction flows.",
-    stack: ["blockchain", "data analytics", "machine learning", "tracking"],
-    link: "https://www.taylorfrancis.com/chapters/edit/10.1201/9781003430421-17/cryptotrace-tracking-cryptocurrency-transactions-blockchain-technology-kuldeep-vayadande-sangam-patil-sayee-chauhan-tanuj-baware-rohit-gurav-sameer-naik",
-    linkLabel: "Springer",
-    metrics: [
-      { k: "domain", v: "crypto transactions" },
-      { k: "technique", v: "ML + blockchain" },
-      { k: "output", v: "transaction tracking" },
-    ],
-  },
-  {
-    slug: "blockchain-land-records",
-    title: "Blockchain Based Land Record System",
-    tag: "blockchain · web3",
-    blurb:
-      "Immutable land record management system leveraging blockchain for data integrity and Web3 interfaces for trustless verification of ownership and transfer history.",
-    stack: ["blockchain", "Web3", "smart contracts"],
-    link: "https://doi.org/10.1051/itmconf/20225001006",
-    linkLabel: "Springer",
-    metrics: [
-      { k: "core property", v: "immutability" },
-      { k: "use case", v: "land records" },
-      { k: "access", v: "Web3 interface" },
-    ],
-  },
 
-  // ── ENERGY / OTHER ────────────────────────────────────────────
-  {
-    slug: "hospital-renewable",
-    title: "Powering Progress: Hospital Renewable Energy",
-    tag: "case study · techno-economic",
-    blurb:
-      "Techno-economic analysis of a hospital's transition to renewable energy. Models time-of-day tariff scheduling and evaluates financial and operational feasibility of the energy shift.",
-    stack: ["techno-economic modeling", "time-of-day tariff", "SQL", "case study"],
-    link: "https://doi.org/10.1051/e3sconf/202345502022",
-    linkLabel: "Springer",
-    metrics: [
-      { k: "sector", v: "healthcare" },
-      { k: "focus", v: "renewable transition" },
-      { k: "method", v: "tariff scheduling model" },
-    ],
-  },
 ];
 
 // ── SVG icons ──────────────────────────────────────────────────────────────
@@ -392,9 +297,7 @@ const FILTERS: { label: string; match: (p: Project) => boolean }[] = [
   { label: "llm/ai", match: (p) => /\b(llm|ai|nlp|prompt)\b/.test(p.tag) },
   { label: "ml/stats", match: (p) => /\b(ml|statistics|forecasting)\b/.test(p.tag) },
   { label: "data-eng", match: (p) => /etl|data engineering|sql|geospatial|backend/.test(p.tag) },
-  { label: "vision", match: (p) => p.tag.includes("vision") },
-  { label: "web3", match: (p) => /web3|blockchain/.test(p.tag) },
-  { label: "published", match: (p) => p.linkLabel === "Springer" || p.linkLabel === "IEEE" },
+  { label: "full-stack", match: (p) => /full-stack|backend/.test(p.tag) },
 ];
 
 // cards shown before "show more" — keeps the section short, especially on phones
@@ -425,11 +328,9 @@ export function ProjectShowcase() {
   return (
     <section ref={section} id="work" className="relative py-24">
       <div className="mx-auto max-w-7xl px-4">
-        <SectionHeading eyebrow="// selected work" title="things i shipped that someone used." className="mb-8">
-          <p className="mt-3 max-w-2xl text-muted-foreground">
-            academic, founder, and contract work. each one solved a real problem
-            for a real person — usually with a deadline.
-          </p>
+        <SectionHeading index="03" label="Selected work" title="Things I shipped that someone used." className="mb-8">
+          Client, academic and personal builds. Each one solved a real problem for a
+          real person, usually with a deadline.
         </SectionHeading>
 
         <div className="-mx-4 mb-8 flex items-center gap-2 overflow-x-auto px-4 pb-1 font-mono text-xs [scrollbar-width:none] sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0 sm:pb-0">
@@ -504,7 +405,7 @@ export function ProjectShowcase() {
 
             <div className="p-5 sm:p-6">
               <div className="flex items-baseline justify-between gap-4">
-                <h3 className="font-display text-2xl text-foreground">
+                <h3 className="font-display text-2xl font-medium tracking-[-0.02em] text-foreground">
                   {p.title}
                 </h3>
                 <span className="shrink-0 font-mono text-[11px] uppercase tracking-wider text-muted-foreground">

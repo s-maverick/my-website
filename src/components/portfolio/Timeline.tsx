@@ -1,5 +1,6 @@
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { motion, useScroll, useSpring } from "framer-motion";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { SectionHeading } from "./SectionHeading";
 
 
@@ -188,8 +189,25 @@ const education = [
 //   );
 // }
 
-function CommitList({ items, prompt }: { items: typeof work; prompt: string }) {
+function CommitList({
+  items,
+  prompt,
+  mobileLines,
+}: {
+  items: typeof work;
+  prompt: string;
+  /** bullets shown per entry on phones before a "+ N more" toggle (desktop shows all) */
+  mobileLines: number;
+}) {
   const list = useRef<HTMLDivElement>(null);
+  const isMobile = useIsMobile();
+  const [expanded, setExpanded] = useState<ReadonlySet<string>>(new Set());
+  const toggle = (hash: string) =>
+    setExpanded((prev) => {
+      const next = new Set(prev);
+      if (!next.delete(hash)) next.add(hash);
+      return next;
+    });
   // the git-graph rail fills in as the list scrolls through the viewport
   const { scrollYProgress } = useScroll({ target: list, offset: ["start 0.75", "end 0.6"] });
   const railFill = useSpring(scrollYProgress, { stiffness: 120, damping: 30, restDelta: 0.001 });
@@ -200,7 +218,11 @@ function CommitList({ items, prompt }: { items: typeof work; prompt: string }) {
         {prompt}
       </div>
       <div ref={list} className="relative divide-y divide-border font-mono text-sm">
-        {items.map((c, i) => (
+        {items.map((c, i) => {
+          const open = !isMobile || expanded.has(c.hash);
+          const lines = open ? c.diff : c.diff.slice(0, mobileLines);
+          const more = c.diff.length - mobileLines;
+          return (
           <motion.div
             key={c.hash}
             initial={{ opacity: 0, x: -10 }}
@@ -229,27 +251,39 @@ function CommitList({ items, prompt }: { items: typeof work; prompt: string }) {
               <div className="text-xs text-muted-foreground">{c.date}</div>
             </div>
  
-            {/* Second row: title + company */}
-            <div>
-              <div className="text-foreground">{c.title}</div>
-              <div className="mt-0.5 text-xs text-muted-foreground">
+            {/* Second row: title + company. Content is set in the sans; the
+                hash, branch and date keep the terminal's mono. */}
+            <div className="font-sans">
+              <div className="text-base font-medium text-foreground">{c.title}</div>
+              <div className="mt-0.5 text-sm text-muted-foreground">
                 {c.where}
               </div>
             </div>
  
             {/* Diff lines — always flush left, consistent across all entries */}
             {/* <ul className="mt-1 space-y-1 text-xs opacity-0 transition-opacity group-hover:opacity-100 md:opacity-70"> */}
-            <ul className="mt-1 space-y-1 text-xs opacity-100 transition-opacity md:opacity-100 md:group-hover:opacity-100">
-              {c.diff.map((d) => (
+            <ul className="mt-1 space-y-1.5 text-sm opacity-100 transition-opacity md:opacity-100 md:group-hover:opacity-100">
+              {lines.map((d) => (
                 // `git diff` style: green "+" gutter, readable near-white text
-                <li key={d} className="flex gap-2 leading-relaxed text-foreground/80">
+                <li key={d} className="flex gap-2.5 leading-relaxed text-foreground/80">
                   <span aria-hidden className="shrink-0 text-accent-2">+</span>
-                  <span>{d.replace(/^\+\s*/, "")}</span>
+                  <span className="font-sans">{d.replace(/^\+\s*/, "")}</span>
                 </li>
               ))}
             </ul>
+            {isMobile && more > 0 && (
+              <button
+                type="button"
+                aria-expanded={open}
+                onClick={() => toggle(c.hash)}
+                className="mt-1 w-fit rounded border border-border px-2 py-0.5 text-xs text-accent transition-colors hover:border-accent"
+              >
+                {open ? "− show less" : `+ ${more} more`}
+              </button>
+            )}
           </motion.div>
-        ))}
+          );
+        })}
         {/* git-graph rail — last child so divide-y leaves it alone */}
         <div aria-hidden className="absolute bottom-8 left-[22px] top-8 w-px bg-border">
           <motion.div
@@ -265,15 +299,19 @@ function CommitList({ items, prompt }: { items: typeof work; prompt: string }) {
 export function Timeline() {
   return (
     <section id="experience" className="mx-auto max-w-7xl px-4 py-24">
-      <SectionHeading className="mb-10" eyebrow="// work experience" title="git log --oneline --work" />
-      <CommitList items={work} prompt="~/work $ git log --graph --decorate" />
+      <SectionHeading className="mb-10" index="02" label="Experience" title="Where I've shipped.">
+        Applied AI in insurance today. Client-facing engineering, machine learning
+        and data science before that.
+      </SectionHeading>
+      <CommitList items={work} prompt="~/work $ git log --graph --decorate" mobileLines={3} />
  
       <div id="education" className="mt-24">
-        <SectionHeading className="mb-10" eyebrow="// education" title="git log --oneline --education" />
+        <SectionHeading size="md" className="mb-8" label="Education" title="Where I studied." />
       </div>
       <CommitList
         items={education}
         prompt="~/education $ git log --graph --decorate"
+        mobileLines={1}
       />
     </section>
   );

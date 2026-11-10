@@ -46,8 +46,25 @@ import react from '@vitejs/plugin-react'
 import { TanStackRouterVite } from '@tanstack/router-plugin/vite'
 import tailwindcss from '@tailwindcss/vite'
 import path from 'path'
+import { execSync } from 'node:child_process'
+
+// Netlify sets COMMIT_REF and URL during a deploy; locally we ask git and leave the URL empty.
+function commitSha() {
+  if (process.env.COMMIT_REF) return process.env.COMMIT_REF
+  try {
+    return execSync('git rev-parse HEAD', { stdio: ['ignore', 'pipe', 'ignore'] }).toString().trim()
+  } catch {
+    return 'dev'
+  }
+}
+// read by index.html (%VITE_SITE_URL%) so share-preview images get an absolute URL
+process.env.VITE_SITE_URL = process.env.URL ?? ''
 
 export default defineConfig({
+  define: {
+    __BUILD_SHA__: JSON.stringify(commitSha().slice(0, 7)),
+    __BUILD_TIME__: JSON.stringify(new Date().toISOString()),
+  },
   plugins: [
     TanStackRouterVite({
       target: 'react',

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef } from "react";
-import { useFrame, useThree } from "@react-three/fiber";
+import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import {
   HELPERS,
@@ -8,7 +8,7 @@ import {
   STREAK_VERTEX,
   WORLD_FX,
 } from "./glsl";
-import { buildEntityGeometry, PLACEMENTS, SHAPES } from "./shapes";
+import { buildEntityGeometry, placementFor, SECTIONS } from "./shapes";
 import { additiveShader, frame, input, shared } from "./state";
 
 // ── particle entity ──────────────────────────────────────────────────────
@@ -177,7 +177,8 @@ void main() {
 
   // small, crisp points; highlights come from density and pulses, not size
   float size = (0.036 + aMeta.x * 0.045) * (1.0 + glow * 1.1 + shock * 2.0 + push * 0.6 + burst * 0.4);
-  gl_PointSize = size * vStretch * uScale / -mv.z;
+  // capped: a particle flung right past the camera would otherwise fill the screen
+  gl_PointSize = min(size * uScale / -mv.z, 0.09 * uScale) * vStretch;
 
   vColor = col * 0.85 + (glow * 0.35 + shock * 0.5 + push * 0.2) * 0.5;
   vAlpha = (0.22 + 0.5 * smoothstep(-2.5, 1.5, world.z)) * (1.0 + glow * 0.9);
@@ -210,7 +211,6 @@ export function MorphEntity({
   surfaceLines: number;
 }) {
   const group = useRef<THREE.Group>(null);
-  const wide = useThree((s) => s.size.width >= 768);
 
   const geometry = useMemo(
     () => buildEntityGeometry(count, surfaceLines),
@@ -242,22 +242,26 @@ export function MorphEntity({
     [geometry, material],
   );
 
-  useFrame((_, delta) => {
+  useFrame((state, delta) => {
     const g = group.current;
     if (!g) return;
 
-    const last = SHAPES.length - 1;
+    // frame.s counts sections; neighbouring sections may share a shape, in
+    // which case only the placement glides and nothing morphs
+    const last = SECTIONS.length - 1;
     const from = Math.min(Math.floor(frame.s), last);
     const to = Math.min(from + 1, last);
     const t = to === from ? 0 : frame.s - from;
-    uniforms.uFrom.value = from;
-    uniforms.uTo.value = to;
-    uniforms.uMorph.value = t;
+    const shapeFrom = SECTIONS[from].shape;
+    const shapeTo = SECTIONS[to].shape;
+    uniforms.uFrom.value = shapeFrom;
+    uniforms.uTo.value = shapeTo;
+    uniforms.uMorph.value = shapeFrom === shapeTo ? 0 : t;
     uniforms.uIntro.value = frame.intro;
 
-    const table = wide ? PLACEMENTS.wide : PLACEMENTS.narrow;
-    const a = table[from];
-    const b = table[to];
+    const { width, height } = state.size;
+    const a = placementFor(from, width, height);
+    const b = placementFor(to, width, height);
     const x = lerp(a.x, b.x, t);
     const y = lerp(a.y, b.y, t);
     const scale = lerp(a.scale, b.scale, t);

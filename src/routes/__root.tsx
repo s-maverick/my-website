@@ -153,6 +153,7 @@ import {
 import { useEffect } from "react";
 
 import { reportLovableError } from "../lib/lovable-error-reporting";
+import { site } from "../lib/site";
 
 function NotFoundComponent() {
   return (
@@ -214,25 +215,8 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
   head: () => ({
-    meta: [
-      { charSet: "utf-8" },
-      { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Sangam Patil" },
-      {
-        name: "description",
-        content:
-          "applied ai engineer + forward deployed engineer. rag systems, llm evaluation and mcp tooling at csaa. ms data science, umass amherst.",
-      },
-      { name: "author", content: "Sangam Patil" },
-      { property: "og:title", content: "sangam patil — applied ai engineer" },
-      {
-        property: "og:description",
-        content:
-          "applied ai engineer shipping rag systems, llm evaluation and mcp tooling.",
-      },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary" },
-    ],
+    // description + share-preview tags are static in src/index.html (crawlers don't run JS)
+    meta: [{ title: site.title }],
     // stylesheet, fonts and favicon are linked in src/index.html so they load
     // with the HTML instead of after the JS bundle
   }),

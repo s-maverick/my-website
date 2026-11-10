@@ -167,8 +167,9 @@
 import { useRef, useState } from "react";
 import { motion } from "framer-motion";
 import emailjs from "@emailjs/browser";
+import { site } from "@/lib/site";
 import { Magnetic } from "./Magnetic";
-import { ScrambleText } from "./ScrambleText";
+import { SectionHeading } from "./SectionHeading";
 
 const SERVICE_ID = "portfolio-service";
 const TEMPLATE_ID = "template_vt7y66t";
@@ -220,14 +221,10 @@ export function Contact() {
           sangam@portfolio:~$ ./contact.sh
         </div>
         <div className="p-6 sm:p-10">
-          <p className="font-mono text-sm text-accent">// contact</p>
-          <h2 className="mt-2 font-display text-3xl text-foreground sm:text-4xl md:text-5xl">
-            <ScrambleText text="got a hard problem? send it." />
-          </h2>
-          <p className="mt-3 max-w-xl text-muted-foreground">
-            best for: ml/ai contract work, founding/early eng roles, research
-            collabs, or just a good conversation about data.
-          </p>
+          <SectionHeading index="06" label="Contact" title="Got a hard problem? Send it." className="mb-0">
+            Best for: ML/AI contract work, founding and early engineering roles,
+            research collabs, or just a good conversation about data.
+          </SectionHeading>
 
           {status === "sent" ? (
             <motion.div
@@ -247,12 +244,13 @@ export function Contact() {
             >
               {/* Name */}
               <div>
-                <label className="block font-mono text-xs uppercase tracking-wider text-muted-foreground mb-2">
+                <label htmlFor="contact-name" className="block font-mono text-xs uppercase tracking-wider text-muted-foreground mb-2">
                   name
                 </label>
                 <div className="flex items-center gap-3 rounded-md border border-border bg-background px-3 py-2 font-mono text-sm transition-colors focus-within:border-accent">
                   <span className="text-accent">$</span>
                   <input
+                    id="contact-name"
                     type="text"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
@@ -267,12 +265,13 @@ export function Contact() {
 
               {/* Email */}
               <div>
-                <label className="block font-mono text-xs uppercase tracking-wider text-muted-foreground mb-2">
+                <label htmlFor="contact-email" className="block font-mono text-xs uppercase tracking-wider text-muted-foreground mb-2">
                   email <span className="text-accent">*</span>
                 </label>
                 <div className="flex items-center gap-3 rounded-md border border-border bg-background px-3 py-2 font-mono text-sm transition-colors focus-within:border-accent">
                   <span className="text-accent">$</span>
                   <input
+                    id="contact-email"
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
@@ -288,12 +287,13 @@ export function Contact() {
 
               {/* Message */}
               <div>
-                <label className="block font-mono text-xs uppercase tracking-wider text-muted-foreground mb-2">
-                  stdin <span className="text-accent">*</span>
+                <label htmlFor="contact-message" className="block font-mono text-xs uppercase tracking-wider text-muted-foreground mb-2">
+                  message <span className="text-accent">*</span>
                 </label>
                 <div className="flex items-start gap-3 rounded-md border border-border bg-background p-3 font-mono text-sm transition-colors focus-within:border-accent">
                   <span className="pt-0.5 text-accent">$</span>
                   <textarea
+                    id="contact-message"
                     value={msg}
                     onChange={(e) => setMsg(e.target.value)}
                     placeholder='echo "hey sangam, i want to..." | mail sangam'
@@ -323,21 +323,24 @@ export function Contact() {
             </form>
           )}
 
-          <div className="mt-10 grid gap-4 border-t border-border pt-6 font-mono text-sm sm:grid-cols-3">
+          <div className="mt-10 grid gap-3 border-t border-border pt-6 font-mono text-sm sm:grid-cols-2">
             {[
-              { k: "email", v: "hello@sangampatil.com", href: "mailto:hello@sangampatil.com" },
-              { k: "github", v: "s-maverick", href: "https://github.com/s-maverick" },
-              { k: "linkedin", v: "in/asangampatil", href: "https://www.linkedin.com/in/asangampatil/" },
-              { k: "calendly", v: "asangampatil/30min", href: "https://calendly.com/asangampatil/30min/" },
-              { k: "scholar.google", v: "sangampatil", href: "https://scholar.google.com/citations?user=-2fwlMQAAAAJ&hl=en/" },
+              { k: "email", v: site.email, href: `mailto:${site.email}` },
+              { k: "github", v: "s-maverick", href: site.links.github },
+              { k: "linkedin", v: "in/asangampatil", href: site.links.linkedin },
+              { k: "calendly", v: "asangampatil/30min", href: site.links.calendly },
+              { k: "scholar.google", v: "sangampatil", href: site.links.scholar },
+              ...(site.resumeUrl ? [{ k: "résumé", v: "pdf", href: site.resumeUrl }] : []),
             ].map((l) => (
               <a
                 key={l.k}
                 href={l.href}
-                className="group flex items-baseline justify-between rounded-md border border-border bg-background px-3 py-2 transition-colors hover:border-accent"
+                // everything except the mailto opens in a new tab
+                {...(l.href.startsWith("mailto:") ? {} : { target: "_blank", rel: "noopener noreferrer" })}
+                className="group flex items-baseline justify-between gap-3 rounded-md border border-border bg-background px-3 py-2 transition-colors hover:border-accent"
               >
                 <span className="text-muted-foreground">{l.k}/</span>
-                <span className="text-foreground group-hover:text-accent">
+                <span className="truncate text-foreground group-hover:text-accent">
                   {l.v} ↗
                 </span>
               </a>

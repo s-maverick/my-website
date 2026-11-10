@@ -1,9 +1,9 @@
-import { useEffect, useMemo, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
 import { HELPERS, STREAK_FRAGMENT, STREAK_VERTEX, WORLD_FX } from "./glsl";
 import { MorphEntity } from "./MorphEntity";
-import { SHAPES } from "./shapes";
+import { SECTIONS } from "./shapes";
 import {
   ACCENT,
   additiveShader,
@@ -51,11 +51,14 @@ function shapeIndexAt(y: number, bounds: Bounds[], vh: number) {
 
 function Director({
   points,
-  onStart,
+  active,
+  onReady,
 }: {
   points: number;
-  onStart?: () => void;
+  active: boolean;
+  onReady?: () => void;
 }) {
+  const framesDrawn = useRef(0);
   const camera = useThree((s) => s.camera);
   const setDpr = useThree((s) => s.setDpr);
   const bounds = useRef<Bounds[]>([]);
@@ -72,7 +75,7 @@ function Director({
     lastScroll.current = window.scrollY;
 
     const measure = () => {
-      bounds.current = SHAPES.map((s, i) => {
+      bounds.current = SECTIONS.map((s, i) => {
         const el = document.getElementById(s.id);
         if (!el) return bounds.current[i] ?? { top: 0, bottom: 0 };
         const r = el.getBoundingClientRect();
@@ -93,9 +96,9 @@ function Director({
     };
   }, []);
 
-  const emit = (shape: number) => {
+  const emit = (section: number) => {
     const detail: SceneStatus = {
-      shape: SHAPES[shape].name,
+      shape: SECTIONS[section].name,
       points,
       fps: Math.round(fps.current.value),
     };
@@ -117,15 +120,18 @@ function Director({
     shared.uTime.value = time;
     shared.uScale.value = (state.size.height * state.viewport.dpr) / 2;
 
-    // intro clock starts on the first rendered frame (after shader compile)
-    if (frame.introStart < 0) {
-      frame.introStart = time;
-      onStart?.();
-    }
-    frame.introTime = time - frame.introStart;
-    frame.intro = Math.min(1, frame.introTime / INTRO_SECONDS);
+    // Two callbacks in means one full frame has been drawn: every program and
+    // buffer is on the GPU, so the page can be revealed without a stall.
+    if (++framesDrawn.current === 2) onReady?.();
+
+    // The scene is built and warmed up early, behind the boot screen, and
+    // idles here as a single bright point until the page says go.
+    if (frame.introStart < 0 && active) frame.introStart = time;
+    const started = frame.introStart >= 0;
+    frame.introTime = started ? time - frame.introStart : 0;
+    frame.intro = started ? Math.min(1, frame.introTime / INTRO_SECONDS) : 0;
     frame.warp = (1 - frame.intro) ** 2;
-    frame.warpTravel += frame.warp * 26 * delta;
+    if (started) frame.warpTravel += frame.warp * 26 * delta;
 
     // scroll → camera height, streak strength, and which shape to show
     const vh = window.innerHeight || 1;
@@ -147,7 +153,9 @@ function Director({
     p.x = damp(p.x, input.x, 3, delta);
     p.y = damp(p.y, input.y, 3, delta);
     const shake =
-      frame.introTime < 0.9 ? (1 - frame.introTime / 0.9) ** 2 * 0.09 : 0;
+      started && frame.introTime < 0.9
+        ? (1 - frame.introTime / 0.9) ** 2 * 0.09
+        : 0;
     camera.position.x = p.x * 0.35 + (Math.random() - 0.5) * shake;
     camera.position.y = frame.camY + p.y * 0.25 + (Math.random() - 0.5) * shake;
     camera.lookAt(0, frame.camY, 0);
@@ -494,11 +502,22 @@ function IntroFx() {
     [flashMat, ringGeo, ringMats],
   );
 
+  const warmFrames = useRef(0);
+
   useFrame(() => {
     const g = group.current;
     if (!g) return;
     const t = frame.introTime;
-    if (frame.introStart < 0 || t > 2.2) {
+    if (frame.introStart < 0) {
+      // Draw the flash and rings (fully transparent) on the scene's first two
+      // frames, behind the boot screen, so their programs finish initialising
+      // there instead of on the first frame of the intro.
+      g.visible = warmFrames.current++ < 2;
+      flashMat.uniforms.uAlpha.value = 0;
+      ringMats[0].opacity = ringMats[1].opacity = 0;
+      return;
+    }
+    if (t > 2.2) {
       g.visible = false;
       return;
     }
@@ -562,18 +581,48 @@ function useInputListeners() {
   }, []);
 }
 
+/**
+ * Compiles every shader in the scene without blocking the main thread
+ * (KHR_parallel_shader_compile where available), then lets rendering begin.
+ * Without this the first frame stalls the page while the GPU driver compiles.
+ */
+function Warmup({ onReady }: { onReady: () => void }) {
+  const gl = useThree((s) => s.gl);
+  const scene = useThree((s) => s.scene);
+  const camera = useThree((s) => s.camera);
+
+  useEffect(() => {
+    let live = true;
+    const done = () => live && onReady();
+    gl.compileAsync(scene, camera).then(done, done);
+    return () => {
+      live = false;
+    };
+  }, [gl, scene, camera, onReady]);
+
+  return null;
+}
+
 export default function Scene3D({
   lite,
-  onStart,
+  active,
+  onReady,
 }: {
   lite: boolean;
-  onStart?: () => void;
+  /** false while the boot screen is up: the scene warms up but holds its intro */
+  active: boolean;
+  /** the scene has drawn its first frame — safe to reveal the page */
+  onReady?: () => void;
 }) {
   useInputListeners();
   const points = lite ? 5000 : 12000;
+  const [warm, setWarm] = useState(false);
+  const onWarm = useCallback(() => setWarm(true), []);
 
   return (
     <Canvas
+      // nothing is drawn until the shaders are ready, so there is no compile stall
+      frameloop={warm ? "always" : "never"}
       dpr={lite ? 1 : [1, 1.5]}
       camera={{ position: [0, 0, 6], fov: 50, near: 0.1, far: 60 }}
       gl={{
@@ -582,8 +631,13 @@ export default function Scene3D({
         powerPreference: "high-performance",
       }}
       style={{ position: "absolute", inset: 0 }}
+      // three's shader error check reads compile logs synchronously, which blocks
+      // until the driver finishes compiling. Keep it for development only.
+      onCreated={({ gl }) => {
+        gl.debug.checkShaderErrors = import.meta.env.DEV;
+      }}
     >
-      <Director points={points} onStart={onStart} />
+      <Director points={points} active={active} onReady={onReady} />
       <DustField
         count={lite ? 600 : 1500}
         span={DUST_VIEWPORTS * SCROLL_DEPTH}
@@ -593,6 +647,7 @@ export default function Scene3D({
       ))}
       <MorphEntity count={points} surfaceLines={lite ? 20 : 28} />
       <IntroFx />
+      <Warmup onReady={onWarm} />
     </Canvas>
   );
 }

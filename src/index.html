@@ -3,11 +3,29 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Sangam Patil</title>
-    <meta name="description" content="applied ai engineer + forward deployed engineer. rag systems, llm evaluation and mcp tooling at csaa. ms data science, umass amherst." />
+    <title>Sangam Patil · Applied AI Engineer</title>
+    <meta
+      name="description"
+      content="Sangam Patil is an Applied AI Engineer and Forward Deployed Engineer building RAG systems, LLM evaluation workflows and MCP tooling. M.S. Data Science, UMass Amherst."
+    />
+    <meta name="author" content="Sangam Patil" />
     <meta name="theme-color" content="#090e12" />
     <link rel="icon" type="image/png" href="/assets/favicon.png" />
     <link rel="apple-touch-icon" href="/assets/favicon.png" />
+
+    <!-- link previews (LinkedIn, Slack, iMessage, X). VITE_SITE_URL is filled in by Netlify builds. -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Sangam Patil" />
+    <meta property="og:title" content="Sangam Patil · Applied AI Engineer" />
+    <meta
+      property="og:description"
+      content="I build AI systems that actually ship: RAG pipelines, LLM evaluation and the services around them."
+    />
+    <meta property="og:image" content="%VITE_SITE_URL%/og.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:image" content="%VITE_SITE_URL%/og.png" />
 
     <!-- styles + fonts load with the HTML, not after the JS, so there's no unstyled first paint -->
     <link rel="stylesheet" href="/styles.css" />
@@ -15,7 +33,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500;600&family=Inter+Tight:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Geist:wght@400..700&family=Geist+Mono:wght@400..600&display=swap"
     />
 
     <!-- painted before any file arrives: dark from the very first frame -->
@@ -26,10 +44,27 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        font: 13px/1.6 "JetBrains Mono", ui-monospace, monospace;
+        font: 13px/1.6 "Geist Mono", ui-monospace, monospace;
         color: #00d3ff;
       }
     </style>
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "Person",
+        "name": "Sangam Patil",
+        "jobTitle": "Applied AI Engineer",
+        "description": "Applied AI Engineer and Forward Deployed Engineer building RAG systems, LLM evaluation workflows and MCP tooling.",
+        "alumniOf": { "@type": "CollegeOrUniversity", "name": "University of Massachusetts Amherst" },
+        "knowsAbout": ["Retrieval-augmented generation", "LLM evaluation", "AI agents", "Model Context Protocol", "FastAPI"],
+        "sameAs": [
+          "https://github.com/s-maverick",
+          "https://www.linkedin.com/in/asangampatil/",
+          "https://scholar.google.com/citations?user=-2fwlMQAAAAJ"
+        ]
+      }
+    </script>
   </head>
   <body>
     <div id="root">

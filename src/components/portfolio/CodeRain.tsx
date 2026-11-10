@@ -50,7 +50,7 @@ export function CodeRain({ className = "" }: { className?: string }) {
       ctx.fillRect(0, 0, width, height);
       ctx.globalCompositeOperation = "source-over";
 
-      ctx.font = `${FONT_SIZE}px JetBrains Mono, monospace`;
+      ctx.font = `${FONT_SIZE}px "Geist Mono", monospace`;
       for (let i = 0; i < cols; i++) {
         const ch = GLYPHS[(Math.random() * GLYPHS.length) | 0];
         const x = i * FONT_SIZE;

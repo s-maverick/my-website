@@ -1,18 +1,19 @@
 import * as THREE from "three";
 
 /**
- * One particle system, six forms — each a piece of the work: AI engineering,
- * software, analytics, ML research. Scrolling between sections morphs the
- * particles from one to the next. `id` is the section's DOM id; `name` shows
- * up in the status bar.
+ * Page sections, top to bottom, and the form the particle system takes in
+ * each. `id` is the section's DOM id; `name` shows up in the status bar.
+ * Shapes: 0 neural net · 1 CPU die · 2 git graph · 3 bar chart ·
+ * 4 loss landscape · 5 network globe.
  */
-export const SHAPES = [
-  { id: "top", name: "model.forward(x) · 5-layer mlp" },
-  { id: "philosophy", name: "soc.route(traces) · 28 io" },
-  { id: "experience", name: "git log --graph --all" },
-  { id: "work", name: "dashboard.render(kpis)" },
-  { id: "stack", name: "optimizer.step() · loss ↓" },
-  { id: "contact", name: "net.connect(world) · 16 routes" },
+export const SECTIONS = [
+  { id: "top", shape: 0, name: "model.forward(x) · 5-layer mlp" },
+  { id: "about", shape: 1, name: "soc.route(traces) · 28 io" },
+  { id: "experience", shape: 2, name: "git log --graph --all" },
+  { id: "work", shape: 3, name: "dashboard.render(kpis)" },
+  { id: "research", shape: 4, name: "optimizer.step() · loss ↓" },
+  { id: "stack", shape: 4, name: "optimizer.step() · loss ↓" },
+  { id: "contact", shape: 5, name: "net.connect(world) · 16 routes" },
 ] as const;
 
 export type Placement = {
@@ -22,27 +23,74 @@ export type Placement = {
   opacity: number;
 };
 
-// where each shape sits relative to the screen centre (world units, ~160px each
-// on a 900px-tall viewport). Wide screens park shapes in the emptier side of the
-// layout; narrow screens tuck them against the right edge, dimmer.
-export const PLACEMENTS: { wide: Placement[]; narrow: Placement[] } = {
-  wide: [
-    { x: 0.7, y: 0.15, scale: 1.05, opacity: 0.8 }, // tower between headline and portrait
-    { x: 3.0, y: 1.6, scale: 0.7, opacity: 0.8 }, // open space right of the heading
-    { x: 2.78, y: 0, scale: 0.9, opacity: 0.8 }, // the xl gutter beside the git log
-    { x: 2.78, y: 0, scale: 0.75, opacity: 0.8 }, // the xl gutter beside the project grid
-    { x: 3.0, y: 1.35, scale: 0.7, opacity: 0.75 }, // right of the heading
-    { x: -3.2, y: 0, scale: 1.3, opacity: 0.75 }, // left of the contact card
-  ],
-  narrow: [
-    { x: 0.95, y: 0.6, scale: 0.7, opacity: 0.45 },
-    { x: 0.7, y: 0.7, scale: 0.6, opacity: 0.4 },
-    { x: 0.9, y: 0, scale: 0.7, opacity: 0.4 },
-    { x: 0.6, y: 0, scale: 0.7, opacity: 0.4 },
-    { x: 0.3, y: 0.9, scale: 0.65, opacity: 0.4 },
-    { x: 0.8, y: 0.3, scale: 0.8, opacity: 0.45 },
-  ],
-};
+// phones: [x as a fraction of the half-width, y, scale, opacity] per section.
+// The shape peeks in from the right edge, dim, out of the text's way.
+const NARROW: [number, number, number, number][] = [
+  [0.78, 0.55, 0.7, 0.24],
+  [0.7, 0.75, 0.55, 0.22],
+  [0.75, 0, 0.7, 0.24],
+  [0.55, 0, 0.7, 0.24],
+  [0.35, 0.95, 0.6, 0.22],
+  [0.35, 0.95, 0.6, 0.22],
+  [0.65, 0.3, 0.8, 0.28],
+];
+
+/**
+ * Where section i's shape sits, in world units from the screen centre.
+ * One world unit is 1/5.6 of the viewport height, so sizes follow the screen
+ * height, while x is worked out in pixels to line up with the page layout:
+ * xl screens (≥ 1280px) keep a 22rem gutter on the right of the 80rem
+ * container for the shape; below that it tucks against the right edge, dimmer.
+ */
+export function placementFor(
+  i: number,
+  width: number,
+  height: number,
+): Placement {
+  const unit = height / 5.6;
+  const half = width / 2;
+  const px = (v: number) => v / unit;
+
+  if (width < 768) {
+    const [fx, y, scale, opacity] = NARROW[i];
+    return { x: px(fx * half), y, scale, opacity };
+  }
+
+  const xl = width >= 1280;
+  const gutter = px(xl ? 640 - 16 - 176 : half - 120);
+  const soften = xl ? 1 : 0.35; // no gutter below xl: the shape sits behind content
+  switch (i) {
+    case 0: // hero: the open right half
+      return {
+        x: px(xl ? 400 : half - 160),
+        y: 0.15,
+        scale: xl ? 1.4 : 1.1,
+        opacity: xl ? 0.9 : 0.55,
+      };
+    case 1: // about
+      return { x: gutter, y: 0.15, scale: 0.72, opacity: 0.85 * soften };
+    case 2: // experience
+      return { x: gutter, y: 0, scale: 0.9, opacity: 0.8 * soften };
+    case 3: // selected work
+      return { x: gutter, y: 0, scale: 0.75, opacity: 0.8 * soften };
+    case 4: // research
+      return { x: gutter, y: 0.1, scale: 0.5, opacity: 0.8 * soften };
+    case 5: // stack: the open space right of the heading
+      return {
+        x: px(Math.min(half, 640) - 160),
+        y: 1.35,
+        scale: 0.7,
+        opacity: 0.75,
+      };
+    default: // contact: left of the centred card
+      return {
+        x: -px(Math.min(518, half - 40)),
+        y: 0,
+        scale: 1.3,
+        opacity: 0.75,
+      };
+  }
+}
 
 const TAU = Math.PI * 2;
 const V = (x: number, y: number, z: number) => new THREE.Vector3(x, y, z);

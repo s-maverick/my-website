@@ -1,213 +1,278 @@
-import { useRef } from "react";
-import { motion, useScroll, useTransform } from "framer-motion";
-import { SkillGraph } from "./SkillGraph";
-import { RoleRotator } from "./RoleRotator";
+import { useEffect, useRef, useState } from "react";
+import {
+  AnimatePresence,
+  motion,
+  useScroll,
+  useTransform,
+  type Variants,
+} from "framer-motion";
+import { ArrowDown, ArrowUpRight, FileText } from "lucide-react";
+import { site } from "@/lib/site";
 import { CodeRain } from "./CodeRain";
-import { TiltCard } from "./TiltCard";
-import { Magnetic } from "./Magnetic";
 import { CountUp } from "./CountUp";
-// 937×1250 JPEG (~200 KB), downscaled from the 3024×4032 original sangam.png
-import sangamPhoto from "@/assets/sangam.jpg";
+import { Magnetic } from "./Magnetic";
+import { SocialLinks } from "./SocialLinks";
 
-const headline = "I build things that actually ship.";
+// "I build ___ that actually ship."
+const BUILDS = [
+  "RAG systems",
+  "LLM agents",
+  "evaluation pipelines",
+  "AI products",
+];
 
-export function Hero() {
+const METRICS = [
+  {
+    value: "+25%",
+    label: "retrieval accuracy",
+    note: "on a held-out eval set",
+  },
+  {
+    value: "55%",
+    label: "faster retrieval",
+    note: "Qdrant migration + chunking",
+  },
+  {
+    value: "45%",
+    label: "lower LLM cost",
+    note: "request-based model routing",
+  },
+  {
+    value: "3+",
+    label: "years shipping AI",
+    note: "insurance, finance, client work",
+  },
+];
+
+const EASE = [0.16, 1, 0.3, 1] as const;
+
+const stagger: Variants = {
+  hidden: {},
+  show: { transition: { staggerChildren: 0.09, delayChildren: 0.1 } },
+};
+const rise: Variants = {
+  hidden: { opacity: 0, y: 16 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.7, ease: EASE } },
+};
+// the name slides up from behind a mask
+const unmask: Variants = {
+  hidden: { y: "108%" },
+  show: { y: 0, transition: { duration: 0.95, ease: EASE } },
+};
+
+/** The rotating noun in the tagline. */
+function BuildRotator({ play }: { play: boolean }) {
+  const [i, setI] = useState(0);
+  useEffect(() => {
+    if (!play) return;
+    const id = setInterval(() => setI((v) => (v + 1) % BUILDS.length), 2600);
+    return () => clearInterval(id);
+  }, [play]);
+
+  return (
+    // padding keeps descenders inside the mask
+    <span className="-my-[0.14em] inline-flex overflow-hidden py-[0.14em] align-bottom">
+      <AnimatePresence mode="popLayout" initial={false}>
+        <motion.span
+          key={BUILDS[i]}
+          initial={{ y: "110%", opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          exit={{ y: "-110%", opacity: 0 }}
+          transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+          className="inline-block whitespace-nowrap bg-gradient-to-r from-accent to-accent-2 bg-clip-text text-transparent"
+        >
+          {BUILDS[i]}
+        </motion.span>
+      </AnimatePresence>
+    </span>
+  );
+}
+
+/**
+ * `ready` flips once the boot screen is gone. The hero is mounted (and laid
+ * out) underneath it the whole time and only plays its entrance on that cue,
+ * so nothing has to be rebuilt at the moment the page is revealed.
+ */
+export function Hero({ ready }: { ready: boolean }) {
   const section = useRef<HTMLElement>(null);
-  // as the hero scrolls away, the copy drifts up and fades — the 3D core stays behind
-  const { scrollYProgress } = useScroll({ target: section, offset: ["start start", "end start"] });
+  // as the hero scrolls away, the copy drifts up and fades — the 3D network stays behind
+  const { scrollYProgress } = useScroll({
+    target: section,
+    offset: ["start start", "end start"],
+  });
   const copyY = useTransform(scrollYProgress, [0, 1], [0, -120]);
   const copyOpacity = useTransform(scrollYProgress, [0, 0.8], [1, 0.15]);
-  const sideY = useTransform(scrollYProgress, [0, 1], [0, -60]);
+  // the name's one-shot glitch; the class comes off afterwards so hover can reuse it
+  const [glitchIntro, setGlitchIntro] = useState(true);
 
   return (
     <section
       ref={section}
       id="top"
-      className="relative mx-auto grid min-h-[92vh] max-w-7xl items-center gap-10 px-4 pb-20 pt-32 md:grid-cols-5 md:gap-12"
+      className="relative mx-auto flex min-h-[100svh] max-w-7xl flex-col justify-center px-4 pb-24 pt-28"
     >
-      <motion.div style={{ y: copyY, opacity: copyOpacity }} className="relative z-10 md:col-span-3">
-        {/* soft scrim so the copy stays readable over the particles behind it */}
+      <motion.div
+        variants={stagger}
+        initial="hidden"
+        animate={ready ? "show" : "hidden"}
+        style={{ y: copyY, opacity: copyOpacity }}
+        className="relative z-10 max-w-[44rem]"
+      >
+        {/* soft scrim so the copy stays readable over anything behind it */}
         <div
           aria-hidden
           className="pointer-events-none absolute -inset-x-16 -inset-y-10 -z-10"
           style={{
             background:
-              "radial-gradient(ellipse 60% 55% at 35% 50%, oklch(0.16 0.012 250 / 0.75), transparent 75%)",
+              "radial-gradient(ellipse 65% 60% at 35% 50%, oklch(0.16 0.012 250 / 0.8), transparent 75%)",
           }}
         />
-        <motion.p
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="font-mono text-sm text-accent"
-        >
-          &gt; whoami --verbose
-        </motion.p>
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.15, duration: 0.4 }}
-          className="mt-1 text-sm"
-        >
-          <RoleRotator />
-        </motion.div>
 
-        <motion.h1
-          initial={{ opacity: 0, y: 12, filter: "blur(12px)" }}
-          // drop the filter afterwards — even blur(0) clips the glitch glow to the box
-          animate={{ opacity: 1, y: 0, filter: "blur(0px)", transitionEnd: { filter: "none" } }}
-          transition={{ duration: 0.8, delay: 0.1 }}
-          className="mt-4 font-display text-5xl leading-[0.95] tracking-tight sm:text-6xl md:text-7xl"
+        <motion.p
+          variants={rise}
+          className="flex flex-wrap items-center gap-x-3 gap-y-1 font-mono text-xs uppercase tracking-[0.18em] text-foreground"
         >
-          <span data-text="Sangam Patil" className="glitch-name inline-block">
-            Sangam Patil
+          <span className="relative flex size-2" aria-hidden>
+            <span className="absolute inline-flex size-full animate-ping rounded-full bg-accent-2 opacity-60" />
+            <span className="relative inline-flex size-2 rounded-full bg-accent-2" />
           </span>
-        </motion.h1>
-
-        <motion.h2
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.6, delay: 0.25 }}
-          className="mt-4 font-display text-xl text-muted-foreground sm:text-2xl md:text-3xl"
-          style={{ perspective: 600 }}
-        >
-          {headline.split(" ").map((word, i) => (
-            <motion.span
-              key={i}
-              initial={{ opacity: 0, y: 10, rotateX: -80 }}
-              animate={{ opacity: 1, y: 0, rotateX: 0 }}
-              transition={{ delay: 0.3 + i * 0.06, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-              className="inline-block origin-bottom"
-            >
-              {word}&nbsp;
-            </motion.span>
-          ))}
-        </motion.h2>
-
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.7, duration: 0.6 }}
-          className="mt-6 max-w-2xl text-base leading-relaxed text-muted-foreground sm:text-lg"
-        >
-          Applied AI Engineer by Title, Shipper by Habit. <br/>
-          Currently at{" "}
-          <span className="text-foreground">CSAA</span> building RAG systems
-          that answer from the right documents, fast and cheap (55% faster
-          retrieval, 45% lower LLM cost, not bad huh?).
+          {site.roles[0]}
+          <span aria-hidden className="text-accent">
+            /
+          </span>
+          {site.roles[1]}
         </motion.p>
+
+        <h1 className="mt-5 font-display text-[clamp(3.25rem,9.5vw,7rem)] font-semibold leading-[0.98] tracking-[-0.045em]">
+          <span className="-my-[0.1em] block overflow-hidden py-[0.1em]">
+            <motion.span variants={unmask} className="block">
+              <span
+                data-text={site.name}
+                className={`name-glitch ${ready && glitchIntro ? "is-intro" : ""}`}
+                onAnimationEnd={(e) =>
+                  e.animationName === "glitch-b" && setGlitchIntro(false)
+                }
+              >
+                <span className={`name-sheen ${ready ? "is-live" : ""}`}>
+                  {site.name}
+                </span>
+              </span>
+            </motion.span>
+          </span>
+        </h1>
+
         <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.85, duration: 0.6 }}
-          className="mt-4 max-w-2xl text-base leading-relaxed text-muted-foreground sm:text-lg"
+          variants={rise}
+          className="mt-6 font-display text-[clamp(1.6rem,3.7vw,2.75rem)] font-medium leading-[1.14] tracking-[-0.025em] text-foreground/70"
         >
-          Right now I&apos;m deep in{" "}
-          <span className="text-accent">Agentic Workflows</span>,{" "}
-          <span className="text-accent">MCP Tooling</span>,{" "}
-          <span className="text-accent">LLM Evaluation</span>, and the kind of
-          vibe-coded prototypes that go from idea to deploy before the coffee
-          gets cold.
+          <span className="sr-only">
+            I build AI systems that actually ship.
+          </span>
+          <span aria-hidden>
+            I build <BuildRotator play={ready} />
+            <br />
+            that actually ship.
+          </span>
+        </motion.p>
+
+        <motion.p
+          variants={rise}
+          className="mt-6 max-w-xl text-base leading-relaxed text-muted-foreground sm:text-lg"
+        >
+          Applied AI engineer at <span className="text-foreground">CSAA</span>,
+          building retrieval systems that answer from the right documents, and
+          the evaluation workflows that prove it. Previously a forward deployed
+          engineer, turning client problems into shipped Python services.
         </motion.p>
 
         <motion.div
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 1, duration: 0.5 }}
-          className="mt-8 flex flex-wrap items-center gap-3 font-mono text-sm"
+          variants={rise}
+          className="mt-9 flex flex-wrap items-center gap-3"
         >
           <Magnetic>
             <a
               href="#work"
-              className="group relative inline-flex items-center gap-2 overflow-hidden rounded-md bg-accent px-4 py-2.5 font-medium text-accent-foreground shadow-[0_0_24px_-6px_var(--color-accent)] transition-all hover:gap-3 hover:shadow-[0_0_36px_-4px_var(--color-accent)]"
+              className="group relative inline-flex h-11 items-center gap-2 overflow-hidden rounded-md bg-accent px-5 text-sm font-medium text-accent-foreground shadow-[0_0_24px_-6px_var(--color-accent)] transition-shadow hover:shadow-[0_0_36px_-4px_var(--color-accent)]"
             >
               {/* light sweep on hover */}
               <span
                 aria-hidden
                 className="pointer-events-none absolute inset-y-0 -left-1/2 w-1/2 -skew-x-12 bg-white/40 opacity-0 blur-sm transition-all duration-700 group-hover:left-full group-hover:opacity-100"
               />
-              [ see the work
-              <span className="transition-transform group-hover:translate-y-0.5">
-                ↓
-              </span>
-              ]
+              View work
+              <ArrowDown className="size-4 transition-transform group-hover:translate-y-0.5" />
             </a>
           </Magnetic>
+          {site.resumeUrl && (
+            <Magnetic>
+              <a
+                href={site.resumeUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex h-11 items-center gap-2 rounded-md border border-border bg-surface/60 px-5 text-sm font-medium text-foreground backdrop-blur-sm transition-colors hover:border-accent hover:text-accent"
+              >
+                Résumé
+                <FileText className="size-4" />
+              </a>
+            </Magnetic>
+          )}
           <Magnetic>
             <a
               href="#contact"
-              className="inline-flex items-center gap-2 rounded-md border border-border bg-surface px-4 py-2.5 text-foreground transition-colors hover:border-accent hover:text-accent"
+              className="group inline-flex h-11 items-center gap-2 rounded-md border border-border bg-surface/60 px-5 text-sm font-medium text-foreground backdrop-blur-sm transition-colors hover:border-accent hover:text-accent"
             >
-              ./say_hi
+              Get in touch
+              <ArrowUpRight className="size-4 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
             </a>
           </Magnetic>
+          <span
+            aria-hidden
+            className="mx-1 hidden h-6 w-px bg-border sm:block"
+          />
+          <SocialLinks />
         </motion.div>
 
+        {/* headline results, straight from the work */}
         <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 1.2, duration: 0.6 }}
-          className="mt-10 grid max-w-lg grid-cols-3 gap-4 font-mono"
+          variants={rise}
+          className="mt-12 grid grid-cols-2 gap-x-6 gap-y-8 border-t border-border pt-8 sm:grid-cols-4"
         >
-          {[
-            // { k: "gpa", v: "3.9" },
-            { k: "years shipping ai", v: "3+" },
-            { k: "faster retrieval", v: "55%" },
-            { k: "lower llm cost", v: "45%" },
-          ].map((s) => (
-            <TiltCard
-              key={s.k}
-              max={14}
-              className="card-lift rounded-md border border-border bg-surface/50 p-3 backdrop-blur-sm"
-            >
-              <div className="text-xl text-accent">
-                <CountUp value={s.v} />
-              </div>
-              <div className="mt-1 text-[11px] uppercase tracking-wider text-muted-foreground">
-                {s.k}
-              </div>
-            </TiltCard>
+          {METRICS.map((m) => (
+            <div key={m.label}>
+              <p className="font-display text-4xl font-medium tabular-nums tracking-[-0.03em] text-foreground">
+                {ready ? <CountUp value={m.value} /> : m.value}
+              </p>
+              <p className="mt-2 font-mono text-[11px] uppercase leading-snug tracking-[0.14em] text-accent">
+                {m.label}
+              </p>
+              <p className="mt-1 text-xs leading-snug text-muted-foreground">
+                {m.note}
+              </p>
+            </div>
           ))}
         </motion.div>
       </motion.div>
 
-      <motion.div
-        initial={{ opacity: 0, scale: 0.96 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ delay: 0.4, duration: 0.7 }}
-        style={{ y: sideY }}
-        className="relative z-10 md:col-span-2 space-y-6"
+      {/* caption under the live 3D network on wide screens (see scene/shapes.ts → placementFor) */}
+      <motion.p
+        initial={{ opacity: 0 }}
+        animate={{ opacity: ready ? 1 : 0 }}
+        transition={{ delay: 2.4, duration: 0.8 }}
+        aria-hidden
+        className="pointer-events-none absolute bottom-24 left-[calc(50%+400px)] hidden -translate-x-1/2 whitespace-nowrap font-mono text-[11px] tracking-wide text-muted-foreground xl:block"
       >
-        <TiltCard max={10} className="group mx-auto w-full max-w-sm rounded-2xl">
-          <div className="absolute -inset-1 rounded-2xl bg-gradient-to-br from-accent via-accent/40 to-accent-hot opacity-60 blur-xl transition-opacity duration-500 group-hover:opacity-90" />
-          {/* rotating conic border + scanline/sheen overlay */}
-          <div className="gradient-border holo relative overflow-hidden rounded-2xl [--gradient-border-fill:var(--color-surface)]">
-            <img
-              src={sangamPhoto}
-              alt="Sangam Patil"
-              // above the fold: fetch it right away, not lazily
-              loading="eager"
-              fetchPriority="high"
-              className="aspect-[4/5] w-full object-cover transition-transform duration-700 group-hover:scale-[1.03]"
-            />
-            <div className="pointer-events-none absolute inset-0 z-[2] bg-gradient-to-t from-background/80 via-background/0 to-transparent" />
-            <div className="absolute bottom-3 left-3 right-3 z-[3] flex items-center justify-between font-mono text-[11px] text-muted-foreground">
-              <span className="text-accent">● online</span>
-              <span>~/sangam.jpg</span>
-            </div>
-          </div>
-        </TiltCard>
-        <SkillGraph />
-      </motion.div>
+        <span className="text-accent">fig. 01</span> · forward pass, 5-layer
+        network · live
+      </motion.p>
 
-      {/* ambient code rain, feathered out with a mask so the 3D layer shows through */}
+      {/* ambient code rain behind the 3D network, feathered out with a mask */}
       <div
-        className="pointer-events-none absolute inset-0 -z-0 overflow-hidden rounded-3xl opacity-60"
+        className="pointer-events-none absolute inset-0 -z-0 overflow-hidden opacity-40"
         style={{
           maskImage:
-            "radial-gradient(ellipse at 30% 40%, #000 0%, rgb(0 0 0 / 0.2) 55%, transparent 80%)",
+            "radial-gradient(ellipse 42% 60% at 78% 45%, #000 0%, rgb(0 0 0 / 0.25) 55%, transparent 80%)",
           WebkitMaskImage:
-            "radial-gradient(ellipse at 30% 40%, #000 0%, rgb(0 0 0 / 0.2) 55%, transparent 80%)",
+            "radial-gradient(ellipse 42% 60% at 78% 45%, #000 0%, rgb(0 0 0 / 0.25) 55%, transparent 80%)",
         }}
       >
         <CodeRain />

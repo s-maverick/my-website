@@ -130,9 +130,9 @@ const LINKS: Link[] = [
 
 
 // the svg draws in a fixed 500×500 viewBox; nodes stay inside these walls so
-// they never cover the title (top) or spill their labels off the edges
+// their labels never spill off the edges
 const VIEW = 500;
-const BOUNDS = { left: 34, right: VIEW - 34, top: 58, bottom: VIEW - 30 };
+const BOUNDS = { left: 34, right: VIEW - 34, top: 28, bottom: VIEW - 30 };
 const clampX = (d: Node, x: number) => Math.max(BOUNDS.left + d.r, Math.min(BOUNDS.right - d.r, x));
 const clampY = (d: Node, y: number) => Math.max(BOUNDS.top + d.r, Math.min(BOUNDS.bottom - d.r, y));
 
@@ -224,7 +224,7 @@ export function SkillGraph() {
       .attr("text-anchor", "middle")
       .attr("dy", (d) => d.r + 14)
       .attr("fill", "oklch(0.85 0.01 250)")
-      .attr("font-family", "JetBrains Mono, monospace")
+      .attr("font-family", "Geist Mono, monospace")
       .attr("font-size", 10);
 
     // pointer repulsion
@@ -274,10 +274,8 @@ export function SkillGraph() {
   }, []);
 
   return (
-    <div className="relative aspect-square w-full overflow-hidden rounded-xl border border-border bg-surface/40">
-      <div className="absolute left-3 top-3 z-10 font-mono text-[11px] uppercase tracking-wider text-muted-foreground">
-        <span className="text-accent">●</span> skill_graph.json · drag nodes
-      </div>
+    // no frame of its own: it lives inside the Stack section's panel
+    <div className="relative aspect-square w-full">
       <svg ref={ref} className="h-full w-full" viewBox={`0 0 ${VIEW} ${VIEW}`} preserveAspectRatio="xMidYMid meet" />
     </div>
   );
